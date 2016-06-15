@@ -12,7 +12,6 @@ public class AbstractObserver extends ContentObserver {
 
     @Override
     public void onChange(boolean selfChange) {
-        getInfoAndSend();
         super.onChange(selfChange);
     }
 
@@ -28,7 +27,7 @@ public class AbstractObserver extends ContentObserver {
         super.onChange(selfChange, uri);
     }
 
-    private void getInfoAndSend(){
+    protected void getInfoAndSend(){
 
     }
 }

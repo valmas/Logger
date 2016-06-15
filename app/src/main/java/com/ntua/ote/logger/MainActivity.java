@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String log = intent.getStringExtra(CallLogService.COPA_MESSAGE);
                 TextView tv = (TextView) findViewById(R.id.LatestLog);
-                tv.setText(log);
+                tv.setText(tv.getText() + "\n" + log);
             }
         };
 
