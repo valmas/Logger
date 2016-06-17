@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,9 +22,12 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".CallLogService"
-            android:exported="false"/>
+        <service android:name=".CallLogService" android:exported="false"/>
+        <receiver android:name="com.ntua.ote.BootEventReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

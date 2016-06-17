@@ -8,16 +8,15 @@ import android.util.Log;
 
 import java.util.Date;
 
-/**
- * Created by valmas on 10/6/2016.
- */
 public class CallObserver extends AbstractObserver {
 
     private CallLogService service;
+    private Date latestCall;
 
-    public CallObserver(Handler handler, CallLogService service) {
+    public CallObserver(Handler handler, CallLogService service, Date latestCall) {
         super(handler);
         this.service = service;
+        this.latestCall = latestCall;
     }
 
     protected void getInfoAndSend(){
@@ -32,31 +31,34 @@ public class CallObserver extends AbstractObserver {
             sb.append("Call Details :");
             managedCursor.moveToLast();
             if (!managedCursor.isAfterLast()) {
-                String phNumber = managedCursor.getString(number);
-                String callType = managedCursor.getString(type);
                 String callDate = managedCursor.getString(date);
-                String callDayTime = new Date(Long.valueOf(callDate)).toString();
-                String callDuration = managedCursor.getString(duration);
-                String dir = null;
-                int dircode = Integer.parseInt(callType);
-                switch (dircode) {
-                    case CallLog.Calls.OUTGOING_TYPE:
-                        dir = "OUTGOING";
-                        break;
+                Date logsLateastCall = new Date(Long.valueOf(callDate));
+                if (logsLateastCall.after(latestCall)) {
+                    String callDayTime = logsLateastCall.toString();
+                    String phNumber = managedCursor.getString(number);
+                    String callType = managedCursor.getString(type);
+                    String callDuration = managedCursor.getString(duration);
+                    String dir = null;
+                    int dircode = Integer.parseInt(callType);
+                    switch (dircode) {
+                        case CallLog.Calls.OUTGOING_TYPE:
+                            dir = "OUTGOING";
+                            break;
 
-                    case CallLog.Calls.INCOMING_TYPE:
-                        dir = "INCOMING";
-                        break;
+                        case CallLog.Calls.INCOMING_TYPE:
+                            dir = "INCOMING";
+                            break;
 
-                    case CallLog.Calls.MISSED_TYPE:
-                        dir = "MISSED";
-                        break;
+                        case CallLog.Calls.MISSED_TYPE:
+                            dir = "MISSED";
+                            break;
+                    }
+                    sb.append("\nPhone Number:--- " + phNumber + " \nCall Type:--- " + dir + " \nCall Date:--- " + callDayTime + " \nCall duration in sec :--- " + callDuration);
+                    sb.append("\n----------------------------------");
+                    service.sendResult(sb.toString());
                 }
-                sb.append("\nPhone Number:--- " + phNumber + " \nCall Type:--- " + dir + " \nCall Date:--- " + callDayTime + " \nCall duration in sec :--- " + callDuration);
-                sb.append("\n----------------------------------");
             }
             managedCursor.close();
-            service.sendResult(sb.toString());
         } catch (SecurityException e) {
             Log.e("CallObserver", "<on change> READ CALL LOG permission not found");
         }

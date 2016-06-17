@@ -9,6 +9,12 @@
     tools:context="com.ntua.ote.logger.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <Switch android:id="@+id/checkbox_run_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/runStart"
+        android:onClick="onRunOnStartup"/>
+
     <Switch android:id="@+id/checkbox_callLog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

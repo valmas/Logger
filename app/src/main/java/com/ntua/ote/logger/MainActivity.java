@@ -20,6 +20,8 @@ import android.view.MenuItem;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.ntua.ote.logger.db.PropertiesDbHelper;
+
 public class MainActivity extends AppCompatActivity {
 
     private Intent callLogServiceIntent;
@@ -50,6 +52,17 @@ public class MainActivity extends AppCompatActivity {
 
         callLogServiceIntent = new Intent(this, CallLogService.class);
         smsLogServiceIntent = new Intent(this, SmsLogService.class);
+
+        initSwitches();
+    }
+
+    private void initSwitches(){
+        PropertiesDbHelper mhelper = new PropertiesDbHelper(this);
+        String value = mhelper.getValue("runOnStart");
+        boolean checked = "1".equals(value) ? true : false;
+        Switch sw = (Switch) findViewById(R.id.checkbox_run_start);
+        sw.setChecked(checked);
+
     }
 
     private void setBroadcastReceivers(){
@@ -58,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String log = intent.getStringExtra(CallLogService.COPA_MESSAGE);
                 TextView tv = (TextView) findViewById(R.id.LatestLog);
-                tv.setText(tv.getText() + "\n" + log);
+                tv.setText(log);
             }
         };
 
@@ -157,5 +170,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             this.stopService(smsLogServiceIntent);
         }
+    }
+
+    public void onRunOnStartup(View view) {
+        boolean checked = ((Switch) view).isChecked();
+        String value = checked ? "1" : "0";
+        PropertiesDbHelper mhelper = new PropertiesDbHelper(this);
+        mhelper.insert("runOnStart", value);
     }
 }
