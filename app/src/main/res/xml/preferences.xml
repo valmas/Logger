@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="pref_runOnStart"
+        android:title="@string/runStart"
+        android:summary="@string/runStart_summary"
+        android:defaultValue="false"/>
+
+    <CheckBoxPreference
+        android:key="pref_keepScreenOn"
+        android:title="@string/keepScreenOn"
+        android:summary="@string/keepScreenOn_summary"
+        android:defaultValue="false"/>
+
+</PreferenceScreen>

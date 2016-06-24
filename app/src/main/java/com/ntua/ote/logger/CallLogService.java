@@ -1,7 +1,9 @@
 package com.ntua.ote.logger;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -9,17 +11,17 @@ import android.os.IBinder;
 import android.provider.CallLog;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.util.Date;
 
-/**
- * Created by valmas on 10/6/2016.
- */
 public class CallLogService extends Service {
 
     private AbstractObserver cObs;
     private LocalBroadcastManager broadcaster;
+    private OutgoingCallsReceiver outgoingCallsReceiver;
 
     static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
 
@@ -27,8 +29,9 @@ public class CallLogService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        unregisterReceiver(outgoingCallsReceiver);
         getContentResolver().unregisterContentObserver(cObs);
+        super.onDestroy();
     }
 
     @Nullable
@@ -46,6 +49,14 @@ public class CallLogService extends Service {
             getContentResolver().registerContentObserver(
                     CallLog.Calls.CONTENT_URI, true, cObs);
         }
+
+        PhoneCallListener phoneCallListener = new PhoneCallListener();
+        TelephonyManager tm = (TelephonyManager) getSystemService( Context.TELEPHONY_SERVICE );
+        tm.listen(phoneCallListener, PhoneStateListener.LISTEN_CALL_STATE );
+
+        IntentFilter filter = new IntentFilter("android.intent.action.NEW_OUTGOING_CALL");
+        outgoingCallsReceiver = new OutgoingCallsReceiver();
+        registerReceiver(outgoingCallsReceiver,filter);
     }
 
     public void sendResult(String message) {

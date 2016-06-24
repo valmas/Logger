@@ -4,4 +4,12 @@
     <string name="callLog">Call Log</string>
     <string name="smsLog">SMS Log</string>
     <string name="runStart">Run on startup</string>
+    <string name="runStart_summary">Runs the logger on phone start</string>
+    <string name="keepScreenOn">Keep screen on</string>
+    <string name="keepScreenOn_summary">Keeps the screen on while app is running</string>
+    <string name="brand_model">Brand/Model:</string>
+    <string name="os_version">Version:</string>
+    <string name="imei">IMEI:</string>
+    <string name="imsi">IMSI:</string>
+    <string name="msisdn">MSISDN:</string>
 </resources>

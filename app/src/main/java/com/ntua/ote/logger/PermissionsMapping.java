@@ -4,13 +4,17 @@ import android.Manifest;
 
 public enum PermissionsMapping {
 
-    READ_CALL_LOG(Manifest.permission.READ_CALL_LOG, 1),
-    READ_SMS_LOG(Manifest.permission.READ_SMS, 2);
+    LOGGER_PERMISSIONS(new String[]{Manifest.permission.READ_CALL_LOG,
+                               Manifest.permission.READ_SMS,
+                               Manifest.permission.PROCESS_OUTGOING_CALLS,
+                               Manifest.permission.RECEIVE_SMS}, 1),
+    REBOOT_NOTIF(new String[]{Manifest.permission.RECEIVE_BOOT_COMPLETED}, 0),
+    INIT_PERMISSIONS(new String[]{Manifest.permission.READ_PHONE_STATE}, 2);
 
-    public final String permission;
+    public final String[] permission;
     public final int requestCode;
 
-    PermissionsMapping(String permission, int requestCode) {
+    PermissionsMapping(String[] permission, int requestCode) {
         this.permission = permission;
         this.requestCode = requestCode;
     }
