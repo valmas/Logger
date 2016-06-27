@@ -22,6 +22,7 @@ public class CallLogService extends Service {
     private AbstractObserver cObs;
     private LocalBroadcastManager broadcaster;
     private OutgoingCallsReceiver outgoingCallsReceiver;
+    private SmsListener smsListener;
 
     static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
 
@@ -30,6 +31,7 @@ public class CallLogService extends Service {
     @Override
     public void onDestroy() {
         unregisterReceiver(outgoingCallsReceiver);
+        unregisterReceiver(smsListener);
         getContentResolver().unregisterContentObserver(cObs);
         super.onDestroy();
     }
@@ -57,6 +59,12 @@ public class CallLogService extends Service {
         IntentFilter filter = new IntentFilter("android.intent.action.NEW_OUTGOING_CALL");
         outgoingCallsReceiver = new OutgoingCallsReceiver();
         registerReceiver(outgoingCallsReceiver,filter);
+
+        filter = new IntentFilter();
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        filter.addAction("android.provider.Telephony.SMS_SENT");
+        smsListener = new SmsListener();
+        registerReceiver(smsListener,filter);
     }
 
     public void sendResult(String message) {

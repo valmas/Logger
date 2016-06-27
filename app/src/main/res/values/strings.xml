@@ -12,4 +12,5 @@
     <string name="imei">IMEI:</string>
     <string name="imsi">IMSI:</string>
     <string name="msisdn">MSISDN:</string>
+    <string name="phone_details">Phone Details</string>
 </resources>

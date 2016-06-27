@@ -69,7 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
             } else if(key.equals(KEY_PREF_KEEP_SCREEN_ON)){
                 CheckBoxPreference pref = (CheckBoxPreference) findPreference(key);
                 if(pref.isChecked()) {
-                    getActivity().getParent().findViewById(R.id.main_layout).setKeepScreenOn(true);
+                    getActivity().findViewById(R.id.main_layout).setKeepScreenOn(true);
                 } else {
                     getActivity().getParent().findViewById(R.id.main_layout).setKeepScreenOn(false);
                 }

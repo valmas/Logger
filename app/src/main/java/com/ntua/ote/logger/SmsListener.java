@@ -8,7 +8,7 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
-public class IncomingSmsReceiver extends BroadcastReceiver {
+public class SmsListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -21,16 +21,21 @@ public class IncomingSmsReceiver extends BroadcastReceiver {
                 for (int i = 0; i < pdusObj.length; i++) {
 
                     SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                    String phoneNumber = currentMessage.getDisplayOriginatingAddress();
-
-                    String senderNum = phoneNumber;
+                    String target = currentMessage.getDisplayOriginatingAddress();
                     String message = currentMessage.getDisplayMessageBody();
 
-                    Log.i("SmsReceiver", "senderNum: "+ senderNum + "; message: " + message);
+                    String log = null;
+                    if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
+                        log = "senderNum: "+ target + "; message: " + message;
+                        Log.i("SmsReceiver", log);
+                    } else  if(intent.getAction().equals("android.provider.Telephony.SMS_SENT")){
+                        log = "receiverNum: "+ target + "; message: " + message;
+                        Log.i("SmsReceiver", log);
+                    }
 
                     // Show alert
                     int duration = Toast.LENGTH_LONG;
-                    Toast toast = Toast.makeText(context, "senderNum: "+ senderNum + ", message: " + message, duration);
+                    Toast toast = Toast.makeText(context, log, duration);
                     toast.show();
                 }
             }
