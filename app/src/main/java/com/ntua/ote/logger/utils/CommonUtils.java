@@ -48,7 +48,6 @@ public class CommonUtils {
     }
 
     public static void requestPermission(PermissionsMapping pm, Activity act){
-        boolean accessGranted = false;
         List<String> deniedPermissions = new ArrayList<>();
         for(String perm : pm.permission) {
             if (ContextCompat.checkSelfPermission(act, perm)
