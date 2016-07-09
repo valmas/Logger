@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:orientation="vertical"
     tools:context="com.ntua.ote.logger.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:orientation="vertical">
 
     <include layout="@layout/phone_details" />
 
@@ -18,10 +18,13 @@
         android:textOn="Stop"
         android:textSize="25sp"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         android:layout_width="250dp"
         android:layout_height="100dp"
         android:onClick="onLogStart"
         android:layout_gravity="center_horizontal" />
+
+    <include layout="@layout/statistics" />
 
     <TextView
         android:id="@+id/LatestLog"

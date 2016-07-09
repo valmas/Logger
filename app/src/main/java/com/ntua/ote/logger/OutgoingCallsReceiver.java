@@ -5,14 +5,34 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.models.LogDetails;
+import com.ntua.ote.logger.utils.Direction;
+import com.ntua.ote.logger.utils.LocationFinder;
+
+import java.util.Date;
+
 public class OutgoingCallsReceiver extends BroadcastReceiver {
 
     public static final String TAG = OutgoingCallsReceiver.class.getSimpleName();
+    private CallLogService service;
+
+    public OutgoingCallsReceiver(CallLogService service) {
+        this.service = service;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent){
-
         String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-        Log.d(TAG, "outgoing call to: " + phoneNumber);
+        LogDetails logDetails = new LogDetails(phoneNumber, new Date(), Direction.OUTGOING);
+
+        long rowId = CallLogDbHelper.getInstance(context).insert(logDetails);
+        if(rowId != -1) {
+            ApplicationController.getInstance().addUnfinishedCall(phoneNumber, rowId);
+            LocationFinder.getInstance(context).getLocation(rowId);
+        }
+
+
+
     }
 }

@@ -13,4 +13,12 @@
     <string name="imsi">IMSI:</string>
     <string name="msisdn">MSISDN:</string>
     <string name="phone_details">Phone Details</string>
+    <string name="statistics">Statistics</string>
+    <string name="calls">Calls:</string>
+    <string name="sms">SMS:</string>
+    <string name="calls_view_label">Calls View</string>
+    <string name="view_entry">View Entry</string>
+    <string name="started_at">Started at:</string>
+    <string name="duration">Duration:</string>
+    <string name="show_location">Show Location</string>
 </resources>

@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -26,13 +23,14 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.jaredrummler.android.device.DeviceName;
+import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.utils.CommonUtils;
+import com.ntua.ote.logger.utils.PermissionsMapping;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private Intent callLogServiceIntent;
-    private Intent smsLogServiceIntent;
 
     private static final String TAG = MainActivity.class.getName();
 
@@ -47,8 +45,18 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setBroadcastReceivers();
+        callLogReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int code = intent.getIntExtra(CallLogService.COPA_MESSAGE, 0);
+                if(code == 1) {
+                    initFromDb();
+                }
+            }
+        };
+
         initFromPreferences();
+        initFromDb();
         tm = (TelephonyManager) getSystemService( Context.TELEPHONY_SERVICE );
 
         if(CommonUtils.havePermissions(PermissionsMapping.INIT_PERMISSIONS, this)) {
@@ -64,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
             sw.setChecked(true);
         }
 
-
     }
 
     public void initFromPreferences(){
@@ -73,13 +80,18 @@ public class MainActivity extends AppCompatActivity {
         this.findViewById(R.id.main_layout).setKeepScreenOn(value);
     }
 
+    public void initFromDb(){
+        long callNum = CallLogDbHelper.getInstance(this).getCount();
+        ((TextView) this.findViewById(R.id.calls_num)).setText(String.valueOf(callNum));
+    }
+
     public void getPhoneDetails(){
         String deviceName = DeviceName.getDeviceName();
         TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String imsi = mTelephonyMgr.getSubscriberId();
         String imei = tm.getDeviceId();
         String version = CommonUtils.getDetailedOsVersion();
-        String mPhoneNumber = mTelephonyMgr.getVoiceMailNumber();
+        String mPhoneNumber = mTelephonyMgr.getLine1Number();
 
         TextView tv = (TextView) findViewById(R.id.brandModel);
         tv.setText(deviceName);
@@ -93,36 +105,27 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(mPhoneNumber);
     }
 
-    //TODO delete
-    private void showinLog(String log){
-        TextView tv = (TextView) findViewById(R.id.LatestLog);
-        tv.setText(log);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
-    private void setBroadcastReceivers(){
-        callLogReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String log = intent.getStringExtra(CallLogService.COPA_MESSAGE);
-                showinLog(log);
-            }
-        };
-
+    @Override
+    protected void onResume(){
+        super.onResume();
+        initFromPreferences();
+        initFromDb();
         LocalBroadcastManager.getInstance(this).registerReceiver((callLogReceiver),
                 new IntentFilter(CallLogService.COPA_RESULT)
         );
     }
 
     @Override
-    protected void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(callLogReceiver);
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onResume(){
-        initFromPreferences();
-        super.onResume();
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).registerReceiver((callLogReceiver),
+                new IntentFilter(CallLogService.COPA_RESULT)
+        );
+        super.onPause();
     }
 
     @Override
@@ -239,5 +242,10 @@ public class MainActivity extends AppCompatActivity {
         // 1dp/ms
         a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);
+    }
+
+    public void viewCallsList(View view) {
+        Intent intent = new Intent(this, CallsViewActivity.class);
+        startActivity(intent);
     }
 }

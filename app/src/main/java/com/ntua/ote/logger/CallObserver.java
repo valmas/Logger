@@ -6,6 +6,10 @@ import android.os.Handler;
 import android.provider.CallLog;
 import android.util.Log;
 
+import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.utils.Direction;
+import com.ntua.ote.logger.utils.LocationFinder;
+
 import java.util.Date;
 
 public class CallObserver extends AbstractObserver {
@@ -20,42 +24,25 @@ public class CallObserver extends AbstractObserver {
     }
 
     protected void getInfoAndSend(){
-        StringBuffer sb = new StringBuffer();
         Uri callLogUri = CallLog.Calls.CONTENT_URI;
         try{
             Cursor managedCursor = service.getApplicationContext().getContentResolver().query(callLogUri, null, null, null, null);
             int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
-            int type = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
             int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
             int duration = managedCursor.getColumnIndex(CallLog.Calls.DURATION);
-            sb.append("Call Details :");
             managedCursor.moveToLast();
             if (!managedCursor.isAfterLast()) {
                 String callDate = managedCursor.getString(date);
                 Date logsLateastCall = new Date(Long.valueOf(callDate));
                 if (logsLateastCall.after(latestCall)) {
-                    String callDayTime = logsLateastCall.toString();
+                    latestCall = logsLateastCall;
                     String phNumber = managedCursor.getString(number);
-                    String callType = managedCursor.getString(type);
-                    String callDuration = managedCursor.getString(duration);
-                    String dir = null;
-                    int dircode = Integer.parseInt(callType);
-                    switch (dircode) {
-                        case CallLog.Calls.OUTGOING_TYPE:
-                            dir = "OUTGOING";
-                            break;
-
-                        case CallLog.Calls.INCOMING_TYPE:
-                            dir = "INCOMING";
-                            break;
-
-                        case CallLog.Calls.MISSED_TYPE:
-                            dir = "MISSED";
-                            break;
+                    int callDuration = managedCursor.getInt(duration);
+                    Long id = ApplicationController.getInstance().getUnfinishedCallId(phNumber);
+                    if(id != null) {
+                        CallLogDbHelper.getInstance(service).update(callDuration, id);
+                        LocationFinder.getInstance(service).removeIdFromPending(id);
                     }
-                    sb.append("\nPhone Number:--- " + phNumber + " \nCall Type:--- " + dir + " \nCall Date:--- " + callDayTime + " \nCall duration in sec :--- " + callDuration);
-                    sb.append("\n----------------------------------");
-                    service.sendResult(sb.toString());
                 }
             }
             managedCursor.close();

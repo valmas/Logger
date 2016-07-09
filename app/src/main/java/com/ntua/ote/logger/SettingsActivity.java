@@ -1,19 +1,17 @@
 package com.ntua.ote.logger;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
+
+import com.ntua.ote.logger.utils.PermissionsMapping;
 
 public class SettingsActivity extends AppCompatActivity {
 

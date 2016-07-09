@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.provider.CallLog;
-
-import com.ntua.ote.logger.db.PropertiesDbHelper;
 
 public class BootEventReceiver extends BroadcastReceiver {
 
