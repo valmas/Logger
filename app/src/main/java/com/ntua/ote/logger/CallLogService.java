@@ -9,23 +9,34 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.CallLog;
+import android.provider.Telephony;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.models.LogDetails;
+import com.ntua.ote.logger.models.StrengthDetails;
+import com.ntua.ote.logger.utils.CommonUtils;
+import com.ntua.ote.logger.utils.GLocationFinder;
+import com.ntua.ote.logger.utils.LogType;
 
 import java.util.Date;
 
 public class CallLogService extends Service{
 
-    private AbstractObserver cObs;
+    private AbstractObserver callObserver;
+    private AbstractObserver smsObserver;
     private LocalBroadcastManager broadcaster;
     private OutgoingCallsReceiver outgoingCallsReceiver;
-    private SmsListener smsListener;
+    private IncomingSmsListener incomingSmsListener;
     private PhoneCallListener phoneCallListener;
     private TelephonyManager tm;
+    private GLocationFinder gLocationFinder;
+    private PhoneStateListener signalStrengthListener;
+    private StrengthDetails strengthDetails;
 
     static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
 
@@ -35,10 +46,13 @@ public class CallLogService extends Service{
 
     @Override
     public void onDestroy() {
+        gLocationFinder.stop();
         unregisterReceiver(outgoingCallsReceiver);
-        unregisterReceiver(smsListener);
-        getContentResolver().unregisterContentObserver(cObs);
+        unregisterReceiver(incomingSmsListener);
+        getContentResolver().unregisterContentObserver(callObserver);
+        getContentResolver().unregisterContentObserver(smsObserver);
         tm.listen(phoneCallListener, PhoneStateListener.LISTEN_NONE );
+        tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_NONE);
         super.onDestroy();
     }
 
@@ -50,15 +64,22 @@ public class CallLogService extends Service{
 
     @Override
     public void onCreate() {
-
+        gLocationFinder = new GLocationFinder(this);
+        gLocationFinder.start();
         Date latestCall = getLogsLatestCall();
         tm = (TelephonyManager) getSystemService( Context.TELEPHONY_SERVICE );
         broadcaster = LocalBroadcastManager.getInstance(this);
         CallLogDbHelper.getInstance(this).setService(this);
-        if(cObs == null) {
-            cObs = new CallObserver(new Handler(), this, latestCall);
+        if(callObserver == null) {
+            callObserver = new CallObserver(new Handler(), this, latestCall);
             getContentResolver().registerContentObserver(
-                    CallLog.Calls.CONTENT_URI, true, cObs);
+                    CallLog.Calls.CONTENT_URI, true, callObserver);
+        }
+
+        if(smsObserver == null) {
+            smsObserver = new OutgoingSmsObserver(new Handler(), this, latestCall);
+            getContentResolver().registerContentObserver(
+                    Telephony.Sms.CONTENT_URI, true, smsObserver);
         }
 
         phoneCallListener = new PhoneCallListener(this);
@@ -70,10 +91,19 @@ public class CallLogService extends Service{
 
         filter = new IntentFilter();
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
-        filter.addAction("android.provider.Telephony.SMS_SENT");
-        smsListener = new SmsListener();
-        registerReceiver(smsListener,filter);
+        incomingSmsListener = new IncomingSmsListener(this);
+        registerReceiver(incomingSmsListener,filter);
 
+        strengthDetails = new StrengthDetails();
+
+        signalStrengthListener = new PhoneStateListener() {
+            @Override
+            public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+                super.onSignalStrengthsChanged(signalStrength);
+                CommonUtils.getRS(signalStrength, tm, strengthDetails);
+            }
+        };
+        tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
     }
 
     public void sendResult(String message) {
@@ -81,6 +111,24 @@ public class CallLogService extends Service{
         if(message != null)
             intent.putExtra(COPA_MESSAGE, message);
         broadcaster.sendBroadcast(intent);
+    }
+
+    public void storeAndSend(LogDetails logDetails){
+        logDetails.setCellId(CommonUtils.getCelliId(this));
+        logDetails.setLac(CommonUtils.getLat(this));
+        logDetails.setRssi(strengthDetails.getRssi());
+        logDetails.setLTE_rsrp(strengthDetails.getLTE_rsrp());
+        logDetails.setLTE_rsrq(strengthDetails.getLTE_rsrq());
+        logDetails.setLTE_rssnr(strengthDetails.getLTE_rssnr());
+        logDetails.setLTE_cqi(strengthDetails.getLTE_cqi());
+        long rowId = CallLogDbHelper.getInstance(this).insert(logDetails);
+        if(rowId != -1) {
+            if(logDetails.getType() == LogType.CALL) {
+                ApplicationController.getInstance().addUnfinishedCall(logDetails.getExternalNumber(), rowId);
+            }
+            //LocationFinder.getInstance(this).getLocation(rowId);
+            gLocationFinder.getLocation(rowId);
+        }
     }
 
     public Date getLogsLatestCall(){
@@ -100,6 +148,7 @@ public class CallLogService extends Service{
         }
         return callDayTime;
     }
+
     public void dbUpdated(int code) {
         Intent intent = new Intent(COPA_RESULT);
         intent.putExtra(COPA_MESSAGE, code);

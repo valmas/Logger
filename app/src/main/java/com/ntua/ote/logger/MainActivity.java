@@ -25,6 +25,8 @@ import android.widget.ToggleButton;
 import com.jaredrummler.android.device.DeviceName;
 import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.utils.CommonUtils;
+import com.ntua.ote.logger.utils.Constants;
+import com.ntua.ote.logger.utils.LogType;
 import com.ntua.ote.logger.utils.PermissionsMapping;
 
 
@@ -81,8 +83,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initFromDb(){
-        long callNum = CallLogDbHelper.getInstance(this).getCount();
+        long callNum = CallLogDbHelper.getInstance(this).getCallCount();
         ((TextView) this.findViewById(R.id.calls_num)).setText(String.valueOf(callNum));
+        long smsNum = CallLogDbHelper.getInstance(this).getSmsCount();
+        ((TextView) this.findViewById(R.id.sms_num)).setText(String.valueOf(smsNum));
     }
 
     public void getPhoneDetails(){
@@ -246,6 +250,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void viewCallsList(View view) {
         Intent intent = new Intent(this, CallsViewActivity.class);
+        Bundle b = new Bundle();
+        b.putInt(Constants.LOG_TYPE_KEY, LogType.CALL.code);
+        intent.putExtras(b); //Put your id to your next Intent
+        startActivity(intent);
+    }
+
+    public void viewSmsList(View view) {
+        Intent intent = new Intent(this, CallsViewActivity.class);
+        Bundle b = new Bundle();
+        b.putInt(Constants.LOG_TYPE_KEY, LogType.SMS.code);
+        intent.putExtras(b); //Put your id to your next Intent
         startActivity(intent);
     }
 }

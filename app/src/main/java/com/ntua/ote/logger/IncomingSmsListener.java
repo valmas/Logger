@@ -6,9 +6,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import android.widget.Toast;
 
-public class SmsListener extends BroadcastReceiver {
+import com.ntua.ote.logger.models.LogDetails;
+import com.ntua.ote.logger.utils.Direction;
+
+import java.util.Date;
+
+public class IncomingSmsListener extends BroadcastReceiver {
+
+    public static final String TAG = IncomingSmsListener.class.getSimpleName();
+    private CallLogService service;
+
+    public IncomingSmsListener(CallLogService service) {
+        this.service = service;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -23,20 +34,12 @@ public class SmsListener extends BroadcastReceiver {
                     SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
                     String target = currentMessage.getDisplayOriginatingAddress();
                     String message = currentMessage.getDisplayMessageBody();
-
-                    String log = null;
+                    LogDetails logDetails = new LogDetails(target, new Date(), null, message);
                     if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
-                        log = "senderNum: "+ target + "; message: " + message;
-                        Log.i("SmsReceiver", log);
-                    } else  if(intent.getAction().equals("android.provider.Telephony.SMS_SENT")){
-                        log = "receiverNum: "+ target + "; message: " + message;
-                        Log.i("SmsReceiver", log);
+                        logDetails.setDirection(Direction.INCOMING);
                     }
 
-                    // Show alert
-                    int duration = Toast.LENGTH_LONG;
-                    Toast toast = Toast.makeText(context, log, duration);
-                    toast.show();
+                    service.storeAndSend(logDetails);
                 }
             }
         } catch (Exception e) {

@@ -28,6 +28,7 @@ import com.ntua.ote.logger.db.CallLogDbSchema;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.Direction;
+import com.ntua.ote.logger.utils.LogType;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -75,17 +76,6 @@ public class CallsViewActivity extends AppCompatActivity {
 
         public SimpleCursorAdapter mAdapter;
 
-        static final String[] PROJECTION = new String[] {
-                CallLogDbSchema.CallLogEntry.COLUMN_NAME_ID,
-                CallLogDbSchema.CallLogEntry.COLUMN_NAME_EXT_NUM,
-                CallLogDbSchema.CallLogEntry.COLUMN_NAME_DATE,
-                CallLogDbSchema.CallLogEntry.COLUMN_NAME_DURATION,
-                CallLogDbSchema.CallLogEntry.COLUMN_NAME_DIRECTION};
-
-        // This is the select criteria
-        static final String SELECTION = null;
-
-
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             ProgressBar progressBar = new ProgressBar(getActivity());
@@ -93,6 +83,10 @@ public class CallsViewActivity extends AppCompatActivity {
                     FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
             progressBar.setIndeterminate(true);
             getListView().setEmptyView(progressBar);
+
+            Bundle b = getActivity().getIntent().getExtras();;
+            final LogType type = b == null ? null :
+                    LogType.parseCode(b.getInt(Constants.LOG_TYPE_KEY));
 
             // Must add the progress bar to the root of the layout
             ViewGroup root = (ViewGroup) getActivity().findViewById(android.R.id.content);
@@ -105,6 +99,7 @@ public class CallsViewActivity extends AppCompatActivity {
                     CallLogDbSchema.CallLogEntry.COLUMN_NAME_DIRECTION};
 
             int[] toViews = {R.id.external_number, R.id.date_time, R.id.duration, R.id.direction};
+
 
             // Create an empty adapter we will use to display the loaded data.
             // We pass null for the cursor, then update it in onLoadFinished()
@@ -136,10 +131,18 @@ public class CallsViewActivity extends AppCompatActivity {
                             int directionCode = aCursor.getInt(aColumnIndex);
                             Direction direction = Direction.parseCode(directionCode);
                             ImageView iv = (ImageView) aView;
-                            if(Direction.OUTGOING == direction) {
-                                iv.setImageDrawable(getResources().getDrawable(R.drawable.outgoing));
-                            } else if(Direction.INCOMING == direction) {
-                                iv.setImageDrawable(getResources().getDrawable(R.drawable.incoming));
+                            if(type == LogType.CALL) {
+                                if (Direction.OUTGOING == direction) {
+                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.outgoing));
+                                } else if (Direction.INCOMING == direction) {
+                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.incoming));
+                                }
+                            } else if (type == LogType.SMS) {
+                                if (Direction.OUTGOING == direction) {
+                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsoutgoing));
+                                } else if (Direction.INCOMING == direction) {
+                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsincoming));
+                                }
                             }
                             return true;
 
@@ -152,19 +155,21 @@ public class CallsViewActivity extends AppCompatActivity {
 
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
-            getLoaderManager().initLoader(0, null, this);
+            getLoaderManager().initLoader(0, b, this);
 
         }
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            LogType type = args == null ? null :
+                    LogType.parseCode(args.getInt(Constants.LOG_TYPE_KEY));
             return new CursorLoader(getActivity(), null,
-                    PROJECTION, SELECTION, null, null)
+                    CallLogDbHelper.LIST_PROJECTION, CallLogDbHelper.selectionByType, new String[]{type.code + ""}, null)
             {
                 @Override
                 public Cursor loadInBackground()
                 {
-                    return CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection());
+                    return CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection(), getSelectionArgs());
                 }
             };
 

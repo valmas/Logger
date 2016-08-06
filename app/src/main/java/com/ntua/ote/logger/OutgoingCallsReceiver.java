@@ -25,14 +25,6 @@ public class OutgoingCallsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent){
         String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
         LogDetails logDetails = new LogDetails(phoneNumber, new Date(), Direction.OUTGOING);
-
-        long rowId = CallLogDbHelper.getInstance(context).insert(logDetails);
-        if(rowId != -1) {
-            ApplicationController.getInstance().addUnfinishedCall(phoneNumber, rowId);
-            LocationFinder.getInstance(context).getLocation(rowId);
-        }
-
-
-
+        service.storeAndSend(logDetails);
     }
 }

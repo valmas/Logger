@@ -14,6 +14,7 @@ import com.ntua.ote.logger.models.LogDetails;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.Direction;
+import com.ntua.ote.logger.utils.LogType;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -24,11 +25,19 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     private static CallLogDbHelper sInstance;
     private CallLogService service;
 
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 8;
     public static final String DATABASE_NAME = "logger.db";
     public static final String TAG = CallLogDbHelper.class.getName();
 
     public static String selection = CallLogEntry.COLUMN_NAME_ID + " = ?";
+    public static String selectionByType = CallLogEntry.COLUMN_NAME_TYPE + " = ?";
+
+    public static final String[] LIST_PROJECTION = new String[] {
+            CallLogDbSchema.CallLogEntry.COLUMN_NAME_ID,
+            CallLogDbSchema.CallLogEntry.COLUMN_NAME_EXT_NUM,
+            CallLogDbSchema.CallLogEntry.COLUMN_NAME_DATE,
+            CallLogDbSchema.CallLogEntry.COLUMN_NAME_DURATION,
+            CallLogDbSchema.CallLogEntry.COLUMN_NAME_DIRECTION};
 
     public static synchronized CallLogDbHelper getInstance(Context context) {
 
@@ -64,11 +73,18 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             String strDate = df.format(logDetails.getDateTime());
             values.put(CallLogEntry.COLUMN_NAME_DATE, strDate);
             values.put(CallLogEntry.COLUMN_NAME_DIRECTION, logDetails.getDirection().code);
+            values.put(CallLogEntry.COLUMN_NAME_TYPE, logDetails.getType().code);
+            values.put(CallLogEntry.COLUMN_NAME_SMS_CONTENT, logDetails.getSmsContent());
+            values.put(CallLogEntry.COLUMN_NAME_CELL_ID, logDetails.getCellId());
+            values.put(CallLogEntry.COLUMN_NAME_LAC, logDetails.getLac());
+            values.put(CallLogEntry.COLUMN_NAME_RSSI, logDetails.getRssi());
+            values.put(CallLogEntry.COLUMN_NAME_LTE_RSRP, logDetails.getLTE_rsrp());
+            values.put(CallLogEntry.COLUMN_NAME_LTE_RSRQ, logDetails.getLTE_rsrq());
+            values.put(CallLogEntry.COLUMN_NAME_LTE_RSSNR, logDetails.getLTE_rssnr());
+            values.put(CallLogEntry.COLUMN_NAME_LTE_CQI, logDetails.getLTE_cqi());
 
             // Insert the new row, returning the primary key value of the new row
-            newRowId = db.insert(
-                    CallLogEntry.TABLE_NAME,
-                    null, values);
+            newRowId = db.insert(CallLogEntry.TABLE_NAME, null, values);
 
             service.dbUpdated(1);
         }catch (Exception e){
@@ -79,11 +95,11 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
         return newRowId;
     }
 
-    public long getCount(){
+    public long getCallCount(){
         SQLiteDatabase db = this.getReadableDatabase();
         long count = 0;
         try {
-            count = DatabaseUtils.queryNumEntries(db, CallLogEntry.TABLE_NAME);
+            count = DatabaseUtils.queryNumEntries(db, CallLogEntry.TABLE_NAME, selectionByType, new String[]{"0"});
         }catch (Exception e){
             Log.d(TAG, "<getCount>" + e.getMessage());
         } finally {
@@ -92,13 +108,26 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
         return count;
     }
 
-    public Cursor getDataForList(String[] projection, String selection){
+    public long getSmsCount(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        long count = 0;
+        try {
+            count = DatabaseUtils.queryNumEntries(db, CallLogEntry.TABLE_NAME, selectionByType, new String[]{"1"});
+        }catch (Exception e){
+            Log.d(TAG, "<getCount>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return count;
+    }
+
+    public Cursor getDataForList(String[] projection, String selection, String[] args){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.query(
                 CallLogEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
-                null,                       // The values for the WHERE clause
+                args,                       // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
                 CallLogEntry.COLUMN_NAME_DATE + " DESC"                                      // The sort order
@@ -177,13 +206,23 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
         if (!cursor.isAfterLast()) {
             Date date = CommonUtils.stringToDate(cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_DATE)));
             Direction direction = Direction.parseCode(cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_DIRECTION)));
+            LogType type = LogType.parseCode(cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_TYPE)));
             return new LogDetails(
+                    type,
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_EXT_NUM)),
                     date,
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_DURATION)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_SMS_CONTENT)),
                     direction,
                     cursor.getDouble(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LATITUDE)),
-                    cursor.getDouble(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LONGITUDE))
+                    cursor.getDouble(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LONGITUDE)),
+                    cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_CELL_ID)),
+                    cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LAC)),
+                    cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_RSSI)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRP)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRQ)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSSNR)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_CQI))
             );
         }
         return null;

@@ -43,7 +43,7 @@ public final class LocationFinder implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 100;
+    private static final long MIN_TIME_BW_UPDATES = 1000;
 
     // Declaring a Location Manager
     protected LocationManager locationManager;

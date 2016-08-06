@@ -86,7 +86,8 @@
                 android:gravity="center_horizontal"
                 android:paddingTop="@dimen/header_top_padding"
                 android:paddingBottom="@dimen/header_top_padding"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:onClick="viewSmsList">
 
                 <TextView
                     android:layout_width="wrap_content"

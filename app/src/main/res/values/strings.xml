@@ -20,5 +20,16 @@
     <string name="view_entry">View Entry</string>
     <string name="started_at">Started at:</string>
     <string name="duration">Duration:</string>
+    <string name="content">Content:</string>
     <string name="show_location">Show Location</string>
+    <string name="title_activity_map">Map</string>
+    <string name="cell_id">Cell ID:</string>
+    <string name="lac">LAC:</string>
+    <string name="close">Close</string>
+    <string name="rssi">RSSI:</string>
+    <string name="lte_details">LTE Details</string>
+    <string name="rsrp">RSRP:</string>
+    <string name="rsrq">RSRQ:</string>
+    <string name="rsssnr">RSSSNR:</string>
+    <string name="cqi">CQI:</string>
 </resources>

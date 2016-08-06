@@ -8,12 +8,12 @@
     android:fitsSystemWindows="true"
     tools:context="com.ntua.ote.logger.ViewEntryActivity">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -30,59 +30,62 @@
         </android.support.design.widget.AppBarLayout>
 
         <LinearLayout
+            android:id="@+id/view_entry_layout_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingRight="@dimen/header_left_right_padding"
             android:paddingLeft="@dimen/header_left_right_padding"
             android:orientation="vertical">
-        <LinearLayout
-            android:paddingTop="@dimen/header_top_padding"
-            android:paddingBottom="@dimen/header_top_padding"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/direction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/direction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/external_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:textAppearance="?android:attr/textAppearanceLarge" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/started_at"
+                        android:textStyle="bold"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <TextView
+                        android:id="@+id/date_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/external_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:paddingTop="@dimen/header_top_padding"
-            android:paddingBottom="@dimen/header_top_padding"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/started_at"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <TextView
-                    android:id="@+id/date_time"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:paddingTop="@dimen/header_top_padding"
-            android:paddingBottom="@dimen/header_top_padding"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-                <TextView
+                    android:id="@+id/duration_content_lbl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/duration"
@@ -96,17 +99,196 @@
                     android:layout_weight="1"
                     android:gravity="end"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/content"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:onClick="showSmsContent"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/show_location_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_location"
+                android:onClick="showLocation"/>
+
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cell_id"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/cell_id"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lac"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/lac"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rssi"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/rssi"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lte_details"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rsrp"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/rsrp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rsrq"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/rsrq"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rsssnr"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/rssnr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:paddingTop="@dimen/header_top_padding"
+                android:paddingBottom="@dimen/header_top_padding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cqi"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:onClick="showLocation"
+                    android:id="@+id/cqi"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/show_location_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/show_location"/>
-
-        </LinearLayout>
-
-        </LinearLayout>
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
 
