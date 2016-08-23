@@ -36,4 +36,6 @@
     <string name="upload_settings">Upload Settings</string>
     <string name="use_wifi_data">Use Wifi and data</string>
     <string name="use_wifi">Use only Wifi</string>
+    <string name="msisdn_dialog_title">Please enter your phone number</string>
+    <string name="ok_btn">OK</string>
 </resources>

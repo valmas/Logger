@@ -1,7 +1,9 @@
 package com.ntua.ote.logger;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -12,12 +14,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -110,9 +114,7 @@ public class MainActivity extends AppCompatActivity {
             msisdn = sharedPref.getString(SettingsActivity.KEY_PREF_MSISDN, "");
             if("".equals(msisdn)) {
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(SettingsActivity.KEY_PREF_MSISDN, "6976497960");
-                editor.apply();
-                tv.setText("6976497960");
+                openDialogForMSISDN(tv, editor);
             } else {
                 tv.setText(msisdn);
             }
@@ -120,6 +122,26 @@ public class MainActivity extends AppCompatActivity {
             tv.setText(msisdn);
         }
 
+    }
+
+    private void openDialogForMSISDN(final TextView tv, final SharedPreferences.Editor editor){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getResources().getString(R.string.msisdn_dialog_title));
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_PHONE);
+        builder.setView(input);
+
+        builder.setPositiveButton(getResources().getString(R.string.ok_btn), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                editor.putString(SettingsActivity.KEY_PREF_MSISDN, input.getText().toString());
+                editor.apply();
+                tv.setText(input.getText().toString());
+            }
+        });
+
+        builder.show();
     }
 
     @Override
