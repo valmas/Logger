@@ -25,7 +25,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     private static CallLogDbHelper sInstance;
     private CallLogService service;
 
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 10;
     public static final String DATABASE_NAME = "logger.db";
     public static final String TAG = CallLogDbHelper.class.getName();
 
@@ -77,6 +77,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             values.put(CallLogEntry.COLUMN_NAME_SMS_CONTENT, logDetails.getSmsContent());
             values.put(CallLogEntry.COLUMN_NAME_CELL_ID, logDetails.getCellId());
             values.put(CallLogEntry.COLUMN_NAME_LAC, logDetails.getLac());
+            values.put(CallLogEntry.COLUMN_NAME_RAT, logDetails.getRat());
             values.put(CallLogEntry.COLUMN_NAME_RSSI, logDetails.getRssi());
             values.put(CallLogEntry.COLUMN_NAME_LTE_RSRP, logDetails.getLTE_rsrp());
             values.put(CallLogEntry.COLUMN_NAME_LTE_RSRQ, logDetails.getLTE_rsrq());
@@ -218,6 +219,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
                     cursor.getDouble(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LONGITUDE)),
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_CELL_ID)),
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LAC)),
+                    cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_RAT)),
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_RSSI)),
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRP)),
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRQ)),
@@ -226,6 +228,57 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             );
         }
         return null;
+    }
+
+    public long getRemoteId(long id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] selectionArgs = { id + "" };
+        long remoteId = -1;
+        try {
+            Cursor c = db.query(
+                    CallLogEntry.TABLE_NAME,
+                    new String[]{CallLogEntry.COLUMN_NAME_REMOTE_ID},
+                    selection,
+                    selectionArgs,                       // The values for the WHERE clause
+                    null,                                     // don't group the rows
+                    null,                                     // don't filter by row groups
+                    null                                      // The sort order
+            );
+            c.moveToFirst();
+            if(!c.isAfterLast()) {
+                return c.getLong(c.getColumnIndex(CallLogEntry.COLUMN_NAME_REMOTE_ID));
+            }
+        }catch (Exception e){
+            Log.d(TAG, "<getCount>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return remoteId;
+    }
+
+    public long setRemoteId(long id, long remoteId){
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+        try {
+            // New value for one column
+            ContentValues values = new ContentValues();
+            values.put(CallLogEntry.COLUMN_NAME_REMOTE_ID, remoteId);
+
+            // Which row to update, based on the ID
+
+            String[] selectionArgs = { id + "" };
+
+            count = db.update(
+                    CallLogEntry.TABLE_NAME,
+                    values,
+                    selection,
+                    selectionArgs);
+        }catch (Exception e){
+            Log.d(TAG, "<update>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return count == 0 ? -1 : 1;
     }
 
 

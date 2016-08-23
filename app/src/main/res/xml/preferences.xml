@@ -13,4 +13,11 @@
         android:summary="@string/keepScreenOn_summary"
         android:defaultValue="false"/>
 
+    <ListPreference
+        android:title="@string/upload_settings"
+        android:key="pref_upload"
+        android:defaultValue="0"
+        android:entries="@array/uploadListValues"
+        android:entryValues="@array/uploadListKeys" />
+
 </PreferenceScreen>

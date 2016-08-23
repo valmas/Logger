@@ -17,6 +17,7 @@ public class LogDetails extends StrengthDetails {
     private double longitude;
     private int cellId;
     private int lac;
+    private String rat;
 
     public LogDetails(String externalNumber, Date dateTime, Direction direction) {
         this.externalNumber = externalNumber;
@@ -34,7 +35,7 @@ public class LogDetails extends StrengthDetails {
     }
 
     public LogDetails(LogType type, String externalNumber, Date dateTime, int duration, String smsContent,
-                      Direction direction, double latitude, double longitude, int cellId, int lac,
+                      Direction direction, double latitude, double longitude, int cellId, int lac, String rat,
                       int rssi, String LTE_rsrp, String LTE_rsrq, String LTE_rssnr, String LTE_cqi) {
         super(rssi, LTE_rsrp, LTE_rsrq, LTE_rssnr, LTE_cqi);
         this.type = type;
@@ -47,6 +48,7 @@ public class LogDetails extends StrengthDetails {
         this.longitude = longitude;
         this.cellId = cellId;
         this.lac = lac;
+        this.rat = rat;
     }
 
     public String getExternalNumber() {
@@ -127,5 +129,13 @@ public class LogDetails extends StrengthDetails {
 
     public void setLac(int lac) {
         this.lac = lac;
+    }
+
+    public String getRat() {
+        return rat;
+    }
+
+    public void setRat(String rat) {
+        this.rat = rat;
     }
 }

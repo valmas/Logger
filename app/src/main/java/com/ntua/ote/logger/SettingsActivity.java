@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +18,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static final String KEY_PREF_RUN_ON_START = "pref_runOnStart";
     public static final String KEY_PREF_KEEP_SCREEN_ON = "pref_keepScreenOn";
+    public static final String KEY_PREF_UPLOAD = "pref_upload";
+    public static final String KEY_PREF_MSISDN = "pref_msisdn";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,13 @@ public class SettingsActivity extends AppCompatActivity {
                     getActivity().findViewById(R.id.main_layout).setKeepScreenOn(true);
                 } else {
                     getActivity().getParent().findViewById(R.id.main_layout).setKeepScreenOn(false);
+                }
+            } else if(key.equals(KEY_PREF_UPLOAD)){
+                ListPreference mListPreference = (ListPreference)getPreferenceScreen().findPreference(key);
+                if("0".equals(mListPreference.getEntry().toString())) {
+
+                } else {
+
                 }
             }
         }

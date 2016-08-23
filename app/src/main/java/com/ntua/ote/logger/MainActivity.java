@@ -24,6 +24,7 @@ import android.widget.ToggleButton;
 
 import com.jaredrummler.android.device.DeviceName;
 import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.LogType;
@@ -90,23 +91,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getPhoneDetails(){
-        String deviceName = DeviceName.getDeviceName();
-        TelephonyManager mTelephonyMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String imsi = mTelephonyMgr.getSubscriberId();
-        String imei = tm.getDeviceId();
-        String version = CommonUtils.getDetailedOsVersion();
-        String mPhoneNumber = mTelephonyMgr.getLine1Number();
+        ApplicationController.getInstance().updatePhoneDetails(tm);
+        PhoneDetails phoneDetails = ApplicationController.getInstance().getPhoneDetails();
 
         TextView tv = (TextView) findViewById(R.id.brandModel);
-        tv.setText(deviceName);
+        tv.setText(phoneDetails.getBrandModel());
         tv = (TextView) findViewById(R.id.version);
-        tv.setText(version);
+        tv.setText(phoneDetails.getVersion());
         tv = (TextView) findViewById(R.id.imei);
-        tv.setText(imei);
+        tv.setText(phoneDetails.getImei());
         tv = (TextView) findViewById(R.id.imsi);
-        tv.setText(imsi);
+        tv.setText(phoneDetails.getImsi());
+
         tv = (TextView) findViewById(R.id.msisdn);
-        tv.setText(mPhoneNumber);
+        String msisdn = phoneDetails.getMsisdn();
+        if("".equals(msisdn)){
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            msisdn = sharedPref.getString(SettingsActivity.KEY_PREF_MSISDN, "");
+            if("".equals(msisdn)) {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(SettingsActivity.KEY_PREF_MSISDN, "6976497960");
+                editor.apply();
+                tv.setText("6976497960");
+            } else {
+                tv.setText(msisdn);
+            }
+        } else {
+            tv.setText(msisdn);
+        }
+
     }
 
     @Override
@@ -179,10 +192,6 @@ public class MainActivity extends AppCompatActivity {
     public void settings(MenuItem item) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-    }
-
-    public void refresh(View view) {
-
     }
 
     public void expandCollapse(View v){

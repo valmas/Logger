@@ -1,5 +1,11 @@
 package com.ntua.ote.logger;
 
+import android.telephony.TelephonyManager;
+
+import com.ntua.ote.logger.models.PhoneDetails;
+import com.ntua.ote.logger.models.rs.InitialRequest;
+import com.ntua.ote.logger.utils.CommonUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +17,8 @@ public class ApplicationController {
     }
 
     private Map<String, Long> unfinishedCalls;
+
+    private PhoneDetails phoneDetails;
 
     private ApplicationController() {
         unfinishedCalls = new HashMap<>();
@@ -25,5 +33,13 @@ public class ApplicationController {
 
     public synchronized void addUnfinishedCall(String phoneNumber, long id){
         unfinishedCalls.put(phoneNumber, id);
+    }
+
+    public void updatePhoneDetails(TelephonyManager tm){
+        phoneDetails = CommonUtils.getPhoneDetails(tm);
+    }
+
+    public PhoneDetails getPhoneDetails(){
+        return phoneDetails;
     }
 }

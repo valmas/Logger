@@ -93,6 +93,9 @@ public class ViewEntryActivity extends AppCompatActivity {
             aView = (TextView) findViewById(R.id.lac);
             aView.setText(String.valueOf(logDetails.getLac()));
 
+            aView = (TextView) findViewById(R.id.rat);
+            aView.setText(String.valueOf(logDetails.getRat()));
+
             aView = (TextView) findViewById(R.id.rssi);
             aView.setText(String.valueOf(logDetails.getRssi()));
 

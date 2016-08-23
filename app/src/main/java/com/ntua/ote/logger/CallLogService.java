@@ -18,10 +18,14 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.models.LogDetails;
+import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.StrengthDetails;
+import com.ntua.ote.logger.models.rs.InitialRequest;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.GLocationFinder;
+import com.ntua.ote.logger.utils.LocationFinder;
 import com.ntua.ote.logger.utils.LogType;
+import com.ntua.ote.logger.utils.RequestType;
 
 import java.util.Date;
 
@@ -37,6 +41,7 @@ public class CallLogService extends Service{
     private GLocationFinder gLocationFinder;
     private PhoneStateListener signalStrengthListener;
     private StrengthDetails strengthDetails;
+    private NetworkConnectivityReceiver networkConnectivityReceiver;
 
     static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
 
@@ -51,6 +56,7 @@ public class CallLogService extends Service{
         unregisterReceiver(incomingSmsListener);
         getContentResolver().unregisterContentObserver(callObserver);
         getContentResolver().unregisterContentObserver(smsObserver);
+        unregisterReceiver(networkConnectivityReceiver);
         tm.listen(phoneCallListener, PhoneStateListener.LISTEN_NONE );
         tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_NONE);
         super.onDestroy();
@@ -104,6 +110,13 @@ public class CallLogService extends Service{
             }
         };
         tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+
+        filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        networkConnectivityReceiver = new NetworkConnectivityReceiver();
+        registerReceiver(networkConnectivityReceiver,filter);
+
+        ApplicationController.getInstance().updatePhoneDetails(tm);
     }
 
     public void sendResult(String message) {
@@ -121,13 +134,23 @@ public class CallLogService extends Service{
         logDetails.setLTE_rsrq(strengthDetails.getLTE_rsrq());
         logDetails.setLTE_rssnr(strengthDetails.getLTE_rssnr());
         logDetails.setLTE_cqi(strengthDetails.getLTE_cqi());
+        logDetails.setRat(CommonUtils.getRat(this));
+
+        PhoneDetails phoneDetails = ApplicationController.getInstance().getPhoneDetails();
+        InitialRequest initialRequest = new InitialRequest(phoneDetails.getBrandModel(), phoneDetails.getVersion(),
+                phoneDetails.getImei(), phoneDetails.getImsi(), phoneDetails.getMsisdn(), logDetails.getExternalNumber(),
+                logDetails.getDateTime(), logDetails.getSmsContent(), logDetails.getDirection(), logDetails.getCellId(),
+                logDetails.getLac(), logDetails.getRssi(), logDetails.getLTE_rsrp(), logDetails.getLTE_rsrq(),
+                logDetails.getLTE_rssnr(), logDetails.getLTE_cqi(), logDetails.getType(), logDetails.getRat());
+
         long rowId = CallLogDbHelper.getInstance(this).insert(logDetails);
+        OutboundController.getInstance(this).newEntryAdded(rowId, initialRequest);
         if(rowId != -1) {
             if(logDetails.getType() == LogType.CALL) {
                 ApplicationController.getInstance().addUnfinishedCall(logDetails.getExternalNumber(), rowId);
             }
-            //LocationFinder.getInstance(this).getLocation(rowId);
-            gLocationFinder.getLocation(rowId);
+            LocationFinder.getInstance(this).getLocation(rowId);
+            //gLocationFinder.getLocation(rowId);
         }
     }
 

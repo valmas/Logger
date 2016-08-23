@@ -3,10 +3,12 @@ package com.ntua.ote.logger.utils;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SignalStrength;
@@ -14,6 +16,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 
+import com.jaredrummler.android.device.DeviceName;
+import com.ntua.ote.logger.SettingsActivity;
+import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.StrengthDetails;
 
 import java.text.DateFormat;
@@ -85,21 +90,17 @@ public class CommonUtils {
         return builder.toString();
     }
 
-    private boolean haveNetworkConnection(Context context) {
-        boolean haveConnectedWifi = false;
-        boolean haveConnectedMobile = false;
-
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        for (NetworkInfo ni : netInfo) {
-            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
-                if (ni.isConnected())
-                    haveConnectedWifi = true;
-            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (ni.isConnected())
-                    haveConnectedMobile = true;
+    public static boolean haveNetworkConnection(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String uploadSetting = sharedPref.getString(SettingsActivity.KEY_PREF_UPLOAD, "0");
+        ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = conMan.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("WIFI")) {
+            return true;
+        } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && uploadSetting.equals("0")){
+            return true;
         }
-        return haveConnectedWifi || haveConnectedMobile;
+        return false;
     }
 
     public static Date stringToDate(String dateString){
@@ -117,18 +118,41 @@ public class CommonUtils {
 
     public static String dateToString(Date date, String format){
         DateFormat df = new SimpleDateFormat(format);
-        String strDate = df.format(date);
-        return strDate;
+        return df.format(date);
     }
 
     public static String getOutputDuration(int duration){
         int hours = duration / 3600;
         int minutes = (duration % 3600) / 60;
         int seconds = duration % 60;
-        String durStr = (hours != 0 ? hours + "hr " : "") +
+        return (hours != 0 ? hours + "hr " : "") +
                 (minutes != 0 ? minutes + "min " : "" ) +
                 (seconds != 0 ? seconds + "sec" : "");
-        return durStr;
+    }
+
+    public static String getRat(Context context){
+        TelephonyManager teleMan = (TelephonyManager)
+                context.getSystemService(Context.TELEPHONY_SERVICE);
+        int networkType = teleMan.getNetworkType();
+        switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_1xRTT: return "1xRTT";
+            case TelephonyManager.NETWORK_TYPE_CDMA: return "CDMA";
+            case TelephonyManager.NETWORK_TYPE_EDGE: return "EDGE";
+            case TelephonyManager.NETWORK_TYPE_EHRPD: return "eHRPD";
+            case TelephonyManager.NETWORK_TYPE_EVDO_0: return "EVDO rev. 0";
+            case TelephonyManager.NETWORK_TYPE_EVDO_A: return "EVDO rev. A";
+            case TelephonyManager.NETWORK_TYPE_EVDO_B: return "EVDO rev. B";
+            case TelephonyManager.NETWORK_TYPE_GPRS: return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA: return "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA: return "HSPA";
+            case TelephonyManager.NETWORK_TYPE_HSPAP: return "HSPA+";
+            case TelephonyManager.NETWORK_TYPE_HSUPA: return "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_IDEN: return "iDen";
+            case TelephonyManager.NETWORK_TYPE_LTE: return "LTE";
+            case TelephonyManager.NETWORK_TYPE_UMTS: return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_UNKNOWN: return "Unknown";
+        }
+        return "";
     }
 
     public static int getCelliId(Context context){
@@ -175,8 +199,7 @@ public class CommonUtils {
         if (cidhexS.length() == 7) {
             int length_cidhexS = cidhexS.length();
             String cidhexSlast4S = cidhexS.substring( length_cidhexS - 4 );
-            int cid2 = Integer.parseInt( cidhexSlast4S, 16 );
-            return cid2;
+            return Integer.parseInt( cidhexSlast4S, 16 );
         } else {
             int cid3 = -1;
             Log.e("1234", "LM | (<7 digits) cid = "+ cid3);
@@ -192,9 +215,8 @@ public class CommonUtils {
         String cidhexSlast2S = cidhexS.substring(length_cidhexS-2,length_cidhexS);
         int LTEcid1 = Integer.parseInt( cidhexSfirst3S, 16 )*10;
         int LTEcid2 = Integer.parseInt( cidhexSlast2S, 16 );
-        int LTEcid = LTEcid1 + LTEcid2;
-        return LTEcid;
-    };
+        return LTEcid1 + LTEcid2;
+    }
 
     public static int getLat(Context context){
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -265,7 +287,6 @@ public class CommonUtils {
                     rssi = 2 * Integer.parseInt(temp[1]) - 113;
                 }  else {
                     LTErsrp = temp[9];
-                    rssi = Integer.parseInt(LTErsrp);
                     LTErsrq = temp[10];
                     LTErssnr = temp[11];
                     LTEcqi = temp[12];
@@ -296,7 +317,6 @@ public class CommonUtils {
                     rssi = 2 * Integer.parseInt(temp[1]) - 113;
                 }  else {
                     LTErsrp = temp[9];
-                    rssi = Integer.parseInt(LTErsrp);
                     LTErsrq = temp[10];
                     LTErssnr = temp[11];
                     LTEcqi = temp[12];
@@ -329,4 +349,14 @@ public class CommonUtils {
         strengthDetails.setLTE_rssnr(LTErssnr);
         strengthDetails.setLTE_cqi(LTEcqi);
     }
+
+    public static PhoneDetails getPhoneDetails(TelephonyManager tm) {
+        String deviceName = DeviceName.getDeviceName();
+        String imsi = tm.getSubscriberId();
+        String imei = tm.getDeviceId();
+        String version = CommonUtils.getDetailedOsVersion();
+        String mPhoneNumber = tm.getLine1Number();
+        return new PhoneDetails(deviceName, version, imei, imsi, mPhoneNumber);
+    }
+
 }

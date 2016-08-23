@@ -7,6 +7,7 @@ import android.provider.CallLog;
 import android.util.Log;
 
 import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.models.rs.DurationRequest;
 import com.ntua.ote.logger.utils.Direction;
 import com.ntua.ote.logger.utils.LocationFinder;
 
@@ -42,6 +43,7 @@ public class CallObserver extends AbstractObserver {
                     if(id != null) {
                         CallLogDbHelper.getInstance(service).update(callDuration, id);
                         LocationFinder.getInstance(service).removeIdFromPending(id);
+                        OutboundController.getInstance(service).durationAdded(id, new DurationRequest(0, callDuration));
                     }
                 }
             }

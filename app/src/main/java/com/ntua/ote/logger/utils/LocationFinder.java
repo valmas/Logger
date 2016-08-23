@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.ntua.ote.logger.OutboundController;
 import com.ntua.ote.logger.db.CallLogDbHelper;
+import com.ntua.ote.logger.models.rs.LocationRequest;
 
 import java.util.List;
 import java.util.PriorityQueue;
@@ -112,30 +114,6 @@ public final class LocationFinder implements LocationListener {
     }
 
     /**
-     * Function to get latitude
-     * */
-    public double getLatitude() {
-        if (location != null) {
-            latitude = location.getLatitude();
-        }
-
-        // return latitude
-        return latitude;
-    }
-
-    /**
-     * Function to get longitude
-     * */
-    public double getLongitude() {
-        if (location != null) {
-            longitude = location.getLongitude();
-        }
-
-        // return longitude
-        return longitude;
-    }
-
-    /**
      * Function to check GPS/wifi enabled
      *
      * @return boolean
@@ -148,42 +126,6 @@ public final class LocationFinder implements LocationListener {
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         Log.d(TAG, isGPSEnabled + " " + isNetworkEnabled);
         return isGPSEnabled || isNetworkEnabled;
-    }
-
-    /**
-     * Function to show settings alert dialog On pressing Settings button will
-     * lauch Settings Options
-     * */
-    public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-
-        // Setting Dialog Message
-        alertDialog
-                .setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(
-                                Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        mContext.startActivity(intent);
-                    }
-                });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-        // Showing Alert Message
-        alertDialog.show();
     }
 
     @Override
@@ -201,6 +143,8 @@ public final class LocationFinder implements LocationListener {
             }
             Log.d(TAG, latitude + " " + longitude);
             CallLogDbHelper.getInstance(mContext).update(latitude, longitude, id);
+            LocationRequest locationRequest = new LocationRequest(0, latitude, longitude);
+            OutboundController.getInstance(mContext).locationAdded(id, locationRequest);
         }
         stopUsingLocation();
         isLocFinderRunning = false;

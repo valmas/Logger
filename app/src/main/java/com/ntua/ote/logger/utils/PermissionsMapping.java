@@ -9,7 +9,9 @@ public enum PermissionsMapping {
                                Manifest.permission.PROCESS_OUTGOING_CALLS,
                                Manifest.permission.RECEIVE_SMS,
                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                               Manifest.permission.ACCESS_FINE_LOCATION}, 1),
+                               Manifest.permission.ACCESS_FINE_LOCATION,
+                               Manifest.permission.INTERNET,
+                               Manifest.permission.ACCESS_NETWORK_STATE}, 1),
     REBOOT_NOTIF(new String[]{Manifest.permission.RECEIVE_BOOT_COMPLETED}, 0),
     INIT_PERMISSIONS(new String[]{Manifest.permission.READ_PHONE_STATE}, 2);
 

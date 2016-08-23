@@ -13,12 +13,16 @@ android {
 
         multiDexEnabled true
     }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
@@ -29,4 +33,5 @@ dependencies {
     compile 'com.android.support:design:23.4.0'
     compile 'com.jaredrummler:android-device-names:1.0.9'
     compile 'com.google.android.gms:play-services:9.2.0'
+    compile 'com.google.code.gson:gson:2.4'
 }

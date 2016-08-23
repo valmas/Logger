@@ -74,6 +74,6 @@ public class GLocationFinder implements
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.e(TAG, "connection failed" + connectionResult);
     }
 }
