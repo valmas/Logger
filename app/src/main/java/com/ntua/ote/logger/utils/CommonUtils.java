@@ -92,12 +92,12 @@ public class CommonUtils {
 
     public static boolean haveNetworkConnection(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String uploadSetting = sharedPref.getString(SettingsActivity.KEY_PREF_UPLOAD, "0");
+        boolean uploadUsingData = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_WIFI_DATA, true);
         ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conMan.getActiveNetworkInfo();
         if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("WIFI")) {
             return true;
-        } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && uploadSetting.equals("0")){
+        } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && uploadUsingData){
             return true;
         }
         return false;

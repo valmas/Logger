@@ -18,7 +18,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static final String KEY_PREF_RUN_ON_START = "pref_runOnStart";
     public static final String KEY_PREF_KEEP_SCREEN_ON = "pref_keepScreenOn";
-    public static final String KEY_PREF_UPLOAD = "pref_upload";
+    public static final String KEY_PREF_UPLOAD_WIFI = "pref_wifi";
+    public static final String KEY_PREF_UPLOAD_WIFI_DATA = "pref_wifiData";
     public static final String KEY_PREF_MSISDN = "pref_msisdn";
 
     @Override
@@ -74,13 +75,12 @@ public class SettingsActivity extends AppCompatActivity {
                 } else {
                     getActivity().getParent().findViewById(R.id.main_layout).setKeepScreenOn(false);
                 }
-            } else if(key.equals(KEY_PREF_UPLOAD)){
-                ListPreference mListPreference = (ListPreference)getPreferenceScreen().findPreference(key);
-                if("0".equals(mListPreference.getEntry().toString())) {
-
-                } else {
-
-                }
+            } else if (key.equals(KEY_PREF_UPLOAD_WIFI)) {
+                CheckBoxPreference p = (CheckBoxPreference)findPreference(KEY_PREF_UPLOAD_WIFI_DATA);
+                p.setChecked(false);
+            } else if (key.equals(KEY_PREF_UPLOAD_WIFI_DATA)) {
+                CheckBoxPreference p = (CheckBoxPreference)findPreference(KEY_PREF_UPLOAD_WIFI);
+                p.setChecked(false);
             }
         }
 
