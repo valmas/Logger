@@ -43,9 +43,13 @@ public class InitialRequest {
 
 	private String rat;
 
+	private int mnc;
+
+	private int mcc;
+
 	public InitialRequest(String brandModel, String version, String imei, String imsi,
 						  String phoneNumber, String externalPhoneNumber, Date dateTime,
-						  String smsContent, Direction direction, int cellId, int lac, int rssi,
+						  String smsContent, Direction direction, int cellId, int lac, int rssi, int mnc, int mcc,
 						  String LTE_rsrp, String LTE_rsrq, String LTE_rssnr, String LTE_cqi, LogType logType, String rat) {
 		this.brandModel = brandModel;
 		this.version = version;
@@ -65,6 +69,8 @@ public class InitialRequest {
 		this.lteCqi = LTE_cqi;
 		this.logType = logType;
 		this.rat = rat;
+		this.mnc = mnc;
+		this.mcc = mcc;
 	}
 
 	public String getPhoneNumber() {
@@ -209,5 +215,21 @@ public class InitialRequest {
 
 	public void setRat(String rat) {
 		this.rat = rat;
+	}
+
+	public int getMnc() {
+		return mnc;
+	}
+
+	public void setMnc(int mnc) {
+		this.mnc = mnc;
+	}
+
+	public int getMcc() {
+		return mcc;
+	}
+
+	public void setMcc(int mcc) {
+		this.mcc = mcc;
 	}
 }

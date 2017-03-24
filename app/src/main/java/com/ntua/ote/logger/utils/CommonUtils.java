@@ -14,9 +14,11 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.jaredrummler.android.device.DeviceName;
+import com.ntua.ote.logger.ApplicationController;
 import com.ntua.ote.logger.SettingsActivity;
 import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.StrengthDetails;
@@ -92,12 +94,17 @@ public class CommonUtils {
 
     public static boolean haveNetworkConnection(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean uploadUsingData = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_WIFI_DATA, true);
+        boolean uploadUsingData = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_DATA, false);
+        boolean uploadUsingWifi = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_WIFI, false);
+        boolean uploadUsingWifiData = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_WIFI_DATA, false);
         ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conMan.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("WIFI")) {
+        if(!(uploadUsingData || uploadUsingWifi || uploadUsingWifiData)){
+            return false;
+        }
+        if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("WIFI") && !uploadUsingData) {
             return true;
-        } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && uploadUsingData){
+        } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && !uploadUsingWifi){
             return true;
         }
         return false;
@@ -356,7 +363,32 @@ public class CommonUtils {
         String imei = tm.getDeviceId();
         String version = CommonUtils.getDetailedOsVersion();
         String mPhoneNumber = tm.getLine1Number();
-        return new PhoneDetails(deviceName, version, imei, imsi, mPhoneNumber);
+        return new PhoneDetails(deviceName, version, imei == null ? "" : imei, imsi, mPhoneNumber);
     }
 
+    public static int getMobileCountryCode(Context context){
+        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        String networkOperator = telephonyManager.getNetworkOperator();
+
+        if (!TextUtils.isEmpty(networkOperator)) {
+            return Integer.parseInt(networkOperator.substring(0, 3));
+        }
+        return 0;
+    }
+
+    public static int getMobileNetworkCode(Context context){
+        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        String networkOperator = telephonyManager.getNetworkOperator();
+
+        if (!TextUtils.isEmpty(networkOperator)) {
+            return Integer.parseInt(networkOperator.substring(3));
+        }
+        return 0;
+    }
+
+    public static String getVersion(String filename){
+        String version = filename.substring(8, filename.length() - 4);
+
+        return version;
+    }
 }

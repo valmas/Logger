@@ -13,28 +13,34 @@ import java.util.Date;
 public class OutgoingSmsObserver extends AbstractObserver {
 
     private CallLogService service;
-    private Date latestSms;
-    private String latestSmsId;
+    private int latestSmsId;
 
     private static final String TAG = CallLogService.class.getName();
 
-    public OutgoingSmsObserver(Handler handler, CallLogService service, Date latestSms) {
+    public OutgoingSmsObserver(Handler handler, CallLogService service) {
         super(handler);
         this.service = service;
-        this.latestSms = latestSms;
+        latestSmsId = getLastMsgId();
+    }
+
+    public boolean deliverSelfNotifications() {
+        return false;
     }
 
     protected void getInfoAndSend(){
         try{
-            Cursor managedCursor = service.getApplicationContext().getContentResolver().query
-                    (Telephony.Sms.Sent.CONTENT_URI, null, null, null, Telephony.Sms.Sent.DATE_SENT + " ASC");
-            managedCursor.moveToLast();
-
+            /*Cursor managedCursor = service.getApplicationContext().getContentResolver().query
+                    (Telephony.Sms.Sent.CONTENT_URI, null, null, null, Telephony.Sms.Sent.DATE_SENT + " ASC");*/
+            Cursor managedCursor = service.getContentResolver().query(Telephony.Sms.Sent.CONTENT_URI, null, null, null, null);
+            //managedCursor.moveToLast();
+            managedCursor.moveToFirst();
             if (!managedCursor.isAfterLast()) {
                 int type = managedCursor.getInt(managedCursor.getColumnIndex(Telephony.Sms.Sent.TYPE));
+                Log.i(TAG, "SMS type: " + type);
                 if (type == Telephony.Sms.MESSAGE_TYPE_SENT) {
-                    String id = managedCursor.getString(managedCursor.getColumnIndex(Telephony.Sms._ID));
-                    if(!id.equals(latestSmsId)) {
+                    int id = managedCursor.getInt(managedCursor.getColumnIndex(Telephony.Sms.Sent._ID));
+                    Log.i(TAG, "SMS id: " + id);
+                    if(id != latestSmsId) {
                         latestSmsId = id;
                         String callDate = managedCursor.getString(managedCursor.getColumnIndex(Telephony.Sms.DATE_SENT));
                         // Date logsLateastSms = new Date(Long.valueOf(callDate));
@@ -55,4 +61,19 @@ public class OutgoingSmsObserver extends AbstractObserver {
             Log.e(TAG, "<on change> READ SMS LOG permission not found");
         }
     }
+
+    private int getLastMsgId() {
+        int lastMsgId = 0;
+        Cursor cur = service.getContentResolver().query(Telephony.Sms.Sent.CONTENT_URI, null, null, null, null);
+        if(cur != null) {
+            cur.moveToFirst();
+            if(!cur.isAfterLast()) {
+                lastMsgId = cur.getInt(cur.getColumnIndex(Telephony.Sms.Sent._ID));
+                cur.close();
+                Log.i(TAG, "Pre Latest SMS ID: " + lastMsgId);
+            }
+        }
+        return lastMsgId;
+    }
+
 }

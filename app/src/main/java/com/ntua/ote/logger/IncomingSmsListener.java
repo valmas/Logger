@@ -3,8 +3,10 @@ package com.ntua.ote.logger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ntua.ote.logger.models.LogDetails;
@@ -27,19 +29,28 @@ public class IncomingSmsListener extends BroadcastReceiver {
         final Bundle bundle = intent.getExtras();
 
         try {
-            if (bundle != null) {
-                final Object[] pdusObj = (Object[]) bundle.get("pdus");
-                for (int i = 0; i < pdusObj.length; i++) {
+            if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
+                if (bundle != null) {
+                    String target = null, message="";
+                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
 
-                    SmsMessage currentMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
-                    String target = currentMessage.getDisplayOriginatingAddress();
-                    String message = currentMessage.getDisplayMessageBody();
-                    LogDetails logDetails = new LogDetails(target, new Date(), null, message);
-                    if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
-                        logDetails.setDirection(Direction.INCOMING);
+                    for (int i = 0; i < pdusObj.length; i++) {
+
+                        SmsMessage currentSMS;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            String format = bundle.getString("format");
+                            currentSMS = SmsMessage.createFromPdu((byte[]) pdusObj[i], format);
+                        } else {
+                            currentSMS = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                        }
+                        target = currentSMS.getDisplayOriginatingAddress();
+                        message += currentSMS.getMessageBody();
+
                     }
-
-                    service.storeAndSend(logDetails);
+                    LogDetails logDetails = new LogDetails(target, new Date(), Direction.INCOMING, message);
+                    if(!TextUtils.isEmpty(logDetails.getExternalNumber())) {
+                        service.storeAndSend(logDetails);
+                    }
                 }
             }
         } catch (Exception e) {

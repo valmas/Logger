@@ -5,50 +5,69 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ntua.ote.logger.models.AsyncResponseDetails;
+import com.ntua.ote.logger.models.AsyncResponseLogDetails;
 import com.ntua.ote.logger.utils.AsyncResponse;
+import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.RequestType;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-public class RestClient extends AsyncTask<Object, String, AsyncResponseDetails> {
+public class RestClient extends AsyncTask<Object, String, AsyncResponseLogDetails> {
 
     public AsyncResponse delegate = null;
 
     private static final String TAG = RestClient.class.getName();
-
-    private static final String URL = "http://192.168.1.3:8080/logger/server/rest/log/";
 
     public RestClient(AsyncResponse delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    protected AsyncResponseDetails doInBackground(Object[] params){
+    protected AsyncResponseLogDetails doInBackground(Object[] params){
         long responseCode = -1;
-        boolean success = false;
+        boolean success;
         RequestType requestType = (RequestType) params[0];
-        HttpPost httpost = new HttpPost(URL + requestType.endpoint);
 
         try {
             Gson gson = new GsonBuilder()
                     .setDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").create();
-            Log.d("data  map", "data map------" + gson.toJson(params[1]));
-            httpost.setEntity(new StringEntity(gson.toJson(params[1])));
-            httpost.setHeader("Accept", "application/json");
-            httpost.setHeader("Content-type", "application/json");
-            DefaultHttpClient httpclient = new DefaultHttpClient();
-            HttpResponse response = httpclient.execute(httpost);
-            int statusCode = response.getStatusLine().getStatusCode();
-            Log.d("response code", "----------------" + statusCode);
+            String json= gson.toJson(params[1]);
+            Log.i("data map", json);
+            HttpURLConnection urlConn;
+            URL url = new URL (Constants.SERVER_URL + requestType.endpoint);
+            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn.setDoInput (true);
+            urlConn.setDoOutput (true);
+            urlConn.setUseCaches(false);
+            urlConn.setRequestProperty("Content-Type", "application/json");
+            urlConn.setRequestProperty("Accept", "application/json");
+            urlConn.setRequestMethod("POST");
+            urlConn.connect();
 
-            if (statusCode == 200) {
-                String responseStr = EntityUtils.toString(response.getEntity());
-                responseCode = Long.parseLong(responseStr);
+            OutputStream os = urlConn.getOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            osw.write(json);
+            osw.flush ();
+            osw.close ();
+
+            int statusCode = urlConn.getResponseCode();
+            Log.i(statusCode + "", TAG);
+            if (statusCode == HttpURLConnection.HTTP_OK) {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        urlConn.getInputStream(),"utf-8"));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                br.close();
+                responseCode = Long.parseLong(sb.toString());
+                Log.i(responseCode + "", TAG);
                 success = true;
             } else {
                 success = false;
@@ -57,13 +76,15 @@ public class RestClient extends AsyncTask<Object, String, AsyncResponseDetails> 
         } catch (Exception e) {
             success = false;
             e.printStackTrace();
+            Log.i(e.getMessage(), TAG);
         }
 
-        return new AsyncResponseDetails((long)params[2], responseCode, success, requestType);
+        return new AsyncResponseLogDetails((long)params[2], responseCode, success, requestType);
     }
 
+
     @Override
-    protected void onPostExecute(AsyncResponseDetails result) {
+    protected void onPostExecute(AsyncResponseLogDetails result) {
         delegate.processFinish(result);
     }
 

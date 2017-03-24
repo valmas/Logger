@@ -2,8 +2,11 @@ package com.ntua.ote.logger;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.ntua.ote.logger.db.CallLogDbHelper;
-import com.ntua.ote.logger.models.AsyncResponseDetails;
+import com.ntua.ote.logger.db.CallLogDbSchema;
+import com.ntua.ote.logger.models.AsyncResponseLogDetails;
 import com.ntua.ote.logger.models.rs.DurationRequest;
 import com.ntua.ote.logger.models.rs.InitialRequest;
 import com.ntua.ote.logger.models.rs.LocationRequest;
@@ -11,10 +14,11 @@ import com.ntua.ote.logger.utils.AsyncResponse;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.RequestType;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OutboundController implements AsyncResponse {
+public class OutboundController implements AsyncResponse<AsyncResponseLogDetails> {
 
     private Map<Long, InitialRequest> pendingInitialRequests;
     private Map<Long, LocationRequest> pendingLocationRequests;
@@ -32,10 +36,33 @@ public class OutboundController implements AsyncResponse {
     }
 
     private OutboundController(Context context){
-        pendingInitialRequests = new HashMap<>();
-        pendingLocationRequests = new HashMap<>();
-        pendingDurationRequests = new HashMap<>();
         this.context = context;
+        Gson gson = new Gson();
+        String initial = CallLogDbHelper.getInstance(context)
+                .getPending(CallLogDbSchema.PendingRequestEntry.COLUMN_NAME_INITIAL);
+        if(initial != null) {
+            Type typeOfHashMap = new TypeToken<Map<Long, InitialRequest>>() { }.getType();
+            pendingInitialRequests = gson.fromJson(initial, typeOfHashMap);
+        } else {
+            pendingInitialRequests = new HashMap<>();
+        }
+        String location = CallLogDbHelper.getInstance(context)
+                .getPending(CallLogDbSchema.PendingRequestEntry.COLUMN_NAME_LOCATION);
+        if(location != null) {
+            Type typeOfHashMap = new TypeToken<Map<Long, LocationRequest>>() { }.getType();
+            pendingLocationRequests = gson.fromJson(location, typeOfHashMap);
+        } else {
+            pendingLocationRequests = new HashMap<>();
+        }
+        String duration = CallLogDbHelper.getInstance(context)
+                .getPending(CallLogDbSchema.PendingRequestEntry.COLUMN_NAME_INITIAL);
+        if(duration != null) {
+            Type typeOfHashMap = new TypeToken<Map<Long, DurationRequest>>() { }.getType();
+            pendingDurationRequests = gson.fromJson(duration, typeOfHashMap);
+        } else {
+            pendingDurationRequests = new HashMap<>();
+        }
+        CallLogDbHelper.getInstance(context).deletePending();
     }
 
     public synchronized void networkConnected(){
@@ -45,6 +72,12 @@ public class OutboundController implements AsyncResponse {
             }
         }
         sendSubsequentRequests();
+    }
+
+    public synchronized void serviceStarted(){
+//        if(CommonUtils.haveNetworkConnection(context)) {
+//            networkConnected();
+//        }
     }
 
     public synchronized void sendSubsequentRequests(){
@@ -84,7 +117,9 @@ public class OutboundController implements AsyncResponse {
     }
 
     public synchronized void locationAdded(long localId, LocationRequest locationRequest){
-        pendingLocationRequests.put(localId, locationRequest);
+        if(!pendingLocationRequests.containsKey(localId)) {
+            pendingLocationRequests.put(localId, locationRequest);
+        }
         if(CommonUtils.haveNetworkConnection(context)) {
             long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(localId);
             if(remoteId > 0) {
@@ -106,11 +141,11 @@ public class OutboundController implements AsyncResponse {
     }
 
     @Override
-    public synchronized void processFinish(AsyncResponseDetails output) {
+    public synchronized void processFinish(AsyncResponseLogDetails output) {
         if(output != null && output.isSuccess()) {
             switch (output.getRequestType()) {
                 case INITIAL:
-                    pendingInitialRequests.remove(output.getRemoteId());
+                    pendingInitialRequests.remove(output.getLocalId());
                     long localId = output.getLocalId();
                     CallLogDbHelper.getInstance(context).setRemoteId(localId, output.getRemoteId());
                     if(pendingLocationRequests.get(localId) != null) {
@@ -125,12 +160,30 @@ public class OutboundController implements AsyncResponse {
                     }
                     break;
                 case LOCATION:
-                    pendingLocationRequests.remove(output.getRemoteId());
+                    pendingLocationRequests.remove(output.getLocalId());
                     break;
                 case DURATION:
-                    pendingDurationRequests.remove(output.getRemoteId());
+                    pendingDurationRequests.remove(output.getLocalId());
                     break;
             }
         }
+    }
+
+    public void destroy(){
+        String initial = null;
+        String location = null;
+        String duration = null;
+        Gson gson = new Gson();
+        if(!pendingInitialRequests.isEmpty()) {
+            initial = gson.toJson(pendingInitialRequests);
+        }
+        if(!pendingLocationRequests.isEmpty()) {
+            location = gson.toJson(pendingLocationRequests);
+        }
+        if(!pendingDurationRequests.isEmpty()) {
+            duration = gson.toJson(pendingDurationRequests);
+        }
+        CallLogDbHelper.getInstance(context).insertPending(initial, location, duration);
+        ourInstance=null;
     }
 }

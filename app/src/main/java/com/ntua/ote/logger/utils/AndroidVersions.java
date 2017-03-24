@@ -2,6 +2,8 @@ package com.ntua.ote.logger.utils;
 
 public enum AndroidVersions {
 
+    S25("Nougat"),
+    S24("Nougat"),
     S23("Marshmallow"),
     S22("Lollipop"),
     S21("Lollipop"),

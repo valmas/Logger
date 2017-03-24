@@ -35,7 +35,7 @@ public class CallObserver extends AbstractObserver {
             if (!managedCursor.isAfterLast()) {
                 String callDate = managedCursor.getString(date);
                 Date logsLateastCall = new Date(Long.valueOf(callDate));
-                if (logsLateastCall.after(latestCall)) {
+                if (latestCall == null || logsLateastCall.after(latestCall)) {
                     latestCall = logsLateastCall;
                     String phNumber = managedCursor.getString(number);
                     int callDuration = managedCursor.getInt(duration);

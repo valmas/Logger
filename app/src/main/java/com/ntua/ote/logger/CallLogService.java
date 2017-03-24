@@ -59,6 +59,9 @@ public class CallLogService extends Service{
         unregisterReceiver(networkConnectivityReceiver);
         tm.listen(phoneCallListener, PhoneStateListener.LISTEN_NONE );
         tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_NONE);
+
+        OutboundController.getInstance(this).destroy();
+
         super.onDestroy();
     }
 
@@ -83,7 +86,7 @@ public class CallLogService extends Service{
         }
 
         if(smsObserver == null) {
-            smsObserver = new OutgoingSmsObserver(new Handler(), this, latestCall);
+            smsObserver = new OutgoingSmsObserver(new Handler(), this);
             getContentResolver().registerContentObserver(
                     Telephony.Sms.CONTENT_URI, true, smsObserver);
         }
@@ -116,14 +119,10 @@ public class CallLogService extends Service{
         networkConnectivityReceiver = new NetworkConnectivityReceiver();
         registerReceiver(networkConnectivityReceiver,filter);
 
-        ApplicationController.getInstance().updatePhoneDetails(tm);
-    }
+        ApplicationController.getInstance().updatePhoneDetails(this);
 
-    public void sendResult(String message) {
-        Intent intent = new Intent(COPA_RESULT);
-        if(message != null)
-            intent.putExtra(COPA_MESSAGE, message);
-        broadcaster.sendBroadcast(intent);
+        OutboundController.getInstance(this).serviceStarted();
+
     }
 
     public void storeAndSend(LogDetails logDetails){
@@ -135,13 +134,15 @@ public class CallLogService extends Service{
         logDetails.setLTE_rssnr(strengthDetails.getLTE_rssnr());
         logDetails.setLTE_cqi(strengthDetails.getLTE_cqi());
         logDetails.setRat(CommonUtils.getRat(this));
+        logDetails.setMnc(CommonUtils.getMobileNetworkCode(this));
+        logDetails.setMcc(CommonUtils.getMobileCountryCode(this));
 
         PhoneDetails phoneDetails = ApplicationController.getInstance().getPhoneDetails();
         InitialRequest initialRequest = new InitialRequest(phoneDetails.getBrandModel(), phoneDetails.getVersion(),
                 phoneDetails.getImei(), phoneDetails.getImsi(), phoneDetails.getMsisdn(), logDetails.getExternalNumber(),
                 logDetails.getDateTime(), logDetails.getSmsContent(), logDetails.getDirection(), logDetails.getCellId(),
-                logDetails.getLac(), logDetails.getRssi(), logDetails.getLTE_rsrp(), logDetails.getLTE_rsrq(),
-                logDetails.getLTE_rssnr(), logDetails.getLTE_cqi(), logDetails.getType(), logDetails.getRat());
+                logDetails.getLac(), logDetails.getRssi(), logDetails.getMnc(), logDetails.getMcc(), logDetails.getLTE_rsrp(),
+                logDetails.getLTE_rsrq(), logDetails.getLTE_rssnr(), logDetails.getLTE_cqi(), logDetails.getType(), logDetails.getRat());
 
         long rowId = CallLogDbHelper.getInstance(this).insert(logDetails);
         OutboundController.getInstance(this).newEntryAdded(rowId, initialRequest);

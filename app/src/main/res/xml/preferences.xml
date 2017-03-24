@@ -22,8 +22,22 @@
 
         <CheckBoxPreference
             android:key="pref_wifi"
+
             android:title="@string/use_wifi"
             android:defaultValue="false"/>
+
+        <CheckBoxPreference
+            android:key="pref_data"
+            android:title="@string/use_data"
+            android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/update">
+
+        <Preference android:title="@string/check_for_update"
+            android:key="pref_update"
+            android:summary="@string/current_version"/>
 
     </PreferenceCategory>
 

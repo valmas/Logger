@@ -32,12 +32,22 @@
         <LinearLayout
             android:id="@+id/list_view_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
-        <ListView
+
+         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@android:id/list" />
+
+        <TextView android:id="@android:id/empty"
+            android:textAlignment="center"
+            android:gravity="center_vertical"
+            android:textSize="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:text="@string/no_results" />
 
         </LinearLayout>
         </LinearLayout>

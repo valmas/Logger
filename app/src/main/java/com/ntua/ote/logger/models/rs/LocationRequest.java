@@ -5,11 +5,14 @@ public class LocationRequest {
 	private long rowId;
 	private double latitude;
 	private double longitude;
+	private boolean located;
 
-    public LocationRequest(long rowId, double latitude, double longitude) {
+
+    public LocationRequest(long rowId, double latitude, double longitude, boolean located) {
         this.rowId = rowId;
         this.latitude = latitude;
         this.longitude = longitude;
+		this.located = located;
     }
 
     public long getRowId() {
@@ -36,4 +39,11 @@ public class LocationRequest {
 		this.longitude = longitude;
 	}
 
+	public boolean isLocated() {
+		return located;
+	}
+
+	public void setLocated(boolean located) {
+		this.located = located;
+	}
 }

@@ -76,13 +76,15 @@ public class CallsViewActivity extends AppCompatActivity {
 
         public SimpleCursorAdapter mAdapter;
 
+        private ProgressBar progressBar;
+
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            ProgressBar progressBar = new ProgressBar(getActivity());
+            progressBar = new ProgressBar(getActivity());
             progressBar.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
             progressBar.setIndeterminate(true);
-            getListView().setEmptyView(progressBar);
+
 
             Bundle b = getActivity().getIntent().getExtras();;
             final LogType type = b == null ? null :
@@ -153,6 +155,8 @@ public class CallsViewActivity extends AppCompatActivity {
             });
             setListAdapter(mAdapter);
 
+            getListView().setEmptyView(getActivity().findViewById(android.R.id.empty));
+
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
             getLoaderManager().initLoader(0, b, this);
@@ -169,7 +173,11 @@ public class CallsViewActivity extends AppCompatActivity {
                 @Override
                 public Cursor loadInBackground()
                 {
-                    return CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection(), getSelectionArgs());
+                    Cursor c = CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection(), getSelectionArgs());
+                    if(c == null || c.isAfterLast()) {
+                        Log.d("empty", TAG);
+                    }
+                    return c;
                 }
             };
 
@@ -177,6 +185,7 @@ public class CallsViewActivity extends AppCompatActivity {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            progressBar.setVisibility(View.GONE);
             mAdapter.swapCursor(data);
         }
 
@@ -192,7 +201,7 @@ public class CallsViewActivity extends AppCompatActivity {
             Intent intent = new Intent(getActivity(), ViewEntryActivity.class);
             Bundle b = new Bundle();
             b.putLong(Constants.VIEW_ENTRY_KEY, id);
-            intent.putExtras(b); //Put your id to your next Intent
+            intent.putExtras(b);
             startActivity(intent);
         }
     }

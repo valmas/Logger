@@ -17,4 +17,10 @@ public class Constants {
     public static final String EXTERNAL_NUMBER_KEY = "external_number";
 
     public static final String LOG_TYPE_KEY = "log_type";
+
+    public static final String FILE_NAME = "update.apk";
+
+    //public static final String SERVER_URL = "http://83.212.84.123:8080/logger/server/rest/log/";
+
+    public static final String SERVER_URL = "http://192.168.1.2:8080/logger/server/rest/log/";
 }

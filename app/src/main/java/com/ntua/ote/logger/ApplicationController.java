@@ -1,6 +1,10 @@
 package com.ntua.ote.logger;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.rs.InitialRequest;
@@ -15,6 +19,8 @@ public class ApplicationController {
     public static ApplicationController getInstance() {
         return ourInstance;
     }
+
+    public static final String VERSION = "logger_v1.0";
 
     private Map<String, Long> unfinishedCalls;
 
@@ -35,11 +41,21 @@ public class ApplicationController {
         unfinishedCalls.put(phoneNumber, id);
     }
 
-    public void updatePhoneDetails(TelephonyManager tm){
+    public void updatePhoneDetails(Context context){
+        TelephonyManager tm = (TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE );
         phoneDetails = CommonUtils.getPhoneDetails(tm);
+        if(TextUtils.isEmpty(phoneDetails.getMsisdn())) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            String msisdn = sharedPref.getString(SettingsActivity.KEY_PREF_MSISDN, "");
+            phoneDetails.setMsisdn(msisdn);
+        }
     }
 
     public PhoneDetails getPhoneDetails(){
         return phoneDetails;
+    }
+
+    public static String getVersion(){
+        return VERSION.split(".v")[1];
     }
 }

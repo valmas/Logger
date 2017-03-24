@@ -2,14 +2,14 @@ package com.ntua.ote.logger.models;
 
 import com.ntua.ote.logger.utils.RequestType;
 
-public class AsyncResponseDetails {
+public class AsyncResponseLogDetails {
 
     private long localId;
     private long remoteId;
     private boolean success;
     private RequestType requestType;
 
-    public AsyncResponseDetails(long localId, long remoteId, boolean success, RequestType requestType) {
+    public AsyncResponseLogDetails(long localId, long remoteId, boolean success, RequestType requestType) {
         this.localId = localId;
         this.remoteId = remoteId;
         this.success = success;

@@ -38,4 +38,11 @@
     <string name="use_wifi">Use only Wifi</string>
     <string name="msisdn_dialog_title">Please enter your phone number</string>
     <string name="ok_btn">OK</string>
+    <string name="use_data">Use only data</string>
+    <string name="no_results">No Results</string>
+    <string name="update">Update</string>
+    <string name="check_for_update">Check for update</string>
+    <string name="current_version">Current Version:</string>
+    <string name="Debug">Debug</string>
+    <string name="server_url">Server URL</string>
 </resources>

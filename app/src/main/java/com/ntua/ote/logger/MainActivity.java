@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getPhoneDetails(){
-        ApplicationController.getInstance().updatePhoneDetails(tm);
+        ApplicationController.getInstance().updatePhoneDetails(this);
         PhoneDetails phoneDetails = ApplicationController.getInstance().getPhoneDetails();
 
         TextView tv = (TextView) findViewById(R.id.brandModel);
@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 editor.putString(SettingsActivity.KEY_PREF_MSISDN, input.getText().toString());
                 editor.apply();
+                ApplicationController.getInstance().getPhoneDetails().setMsisdn(input.getText().toString());
                 tv.setText(input.getText().toString());
             }
         });

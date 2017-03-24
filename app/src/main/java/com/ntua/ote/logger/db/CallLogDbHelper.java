@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.ntua.ote.logger.CallLogService;
 import com.ntua.ote.logger.db.CallLogDbSchema.CallLogEntry;
+import com.ntua.ote.logger.db.CallLogDbSchema.PendingRequestEntry;
 import com.ntua.ote.logger.models.LogDetails;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
@@ -25,7 +26,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     private static CallLogDbHelper sInstance;
     private CallLogService service;
 
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 13;
     public static final String DATABASE_NAME = "logger.db";
     public static final String TAG = CallLogDbHelper.class.getName();
 
@@ -53,9 +54,12 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
 
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CallLogDbSchema.SQL_CREATE_ENTRIES);
+        db.execSQL(CallLogDbSchema.SQL_CREATE_PENDING_ENTRIES);
     }
+
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(CallLogDbSchema.SQL_DELETE_ENTRIES);
+        db.execSQL(CallLogDbSchema.SQL_DELETE_PENDING_ENTRIES);
         onCreate(db);
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -78,6 +82,8 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             values.put(CallLogEntry.COLUMN_NAME_CELL_ID, logDetails.getCellId());
             values.put(CallLogEntry.COLUMN_NAME_LAC, logDetails.getLac());
             values.put(CallLogEntry.COLUMN_NAME_RAT, logDetails.getRat());
+            values.put(CallLogEntry.COLUMN_NAME_MNC, logDetails.getMnc());
+            values.put(CallLogEntry.COLUMN_NAME_MCC, logDetails.getMcc());
             values.put(CallLogEntry.COLUMN_NAME_RSSI, logDetails.getRssi());
             values.put(CallLogEntry.COLUMN_NAME_LTE_RSRP, logDetails.getLTE_rsrp());
             values.put(CallLogEntry.COLUMN_NAME_LTE_RSRQ, logDetails.getLTE_rsrq());
@@ -220,6 +226,8 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_CELL_ID)),
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LAC)),
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_RAT)),
+                    cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_MNC)),
+                    cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_MCC)),
                     cursor.getInt(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_RSSI)),
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRP)),
                     cursor.getString(cursor.getColumnIndex(CallLogEntry.COLUMN_NAME_LTE_RSRQ)),
@@ -279,6 +287,58 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             db.close();
         }
         return count == 0 ? -1 : 1;
+    }
+
+    public long insertPending(String initial, String location, String duration){
+        SQLiteDatabase db = this.getWritableDatabase();
+        long newRowId = -1;
+        try {
+            // Create a new map of values, where column names are the keys
+            ContentValues values = new ContentValues();
+            values.put(PendingRequestEntry.COLUMN_NAME_INITIAL, initial);
+            values.put(PendingRequestEntry.COLUMN_NAME_LOCATION, location);
+            values.put(PendingRequestEntry.COLUMN_NAME_DURATION, duration);
+
+            // Insert the new row, returning the primary key value of the new row
+            newRowId = db.insert(PendingRequestEntry.TABLE_NAME, null, values);
+        }catch (Exception e){
+            Log.e(TAG, "<insert pending>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return newRowId;
+    }
+
+    public String getPending(String requestEntry){
+        SQLiteDatabase db = this.getReadableDatabase();
+        try {
+            Cursor c = db.query(
+                    PendingRequestEntry.TABLE_NAME,
+                    new String[]{requestEntry},
+                    null, null, null, null, null);
+            c.moveToFirst();
+            if(!c.isAfterLast()) {
+                return c.getString(c.getColumnIndex(requestEntry));
+            }
+        }catch (Exception e){
+            Log.d(TAG, "<getInitial>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return null;
+    }
+
+    public long deletePending(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        long newRowId = -1;
+        try {
+            newRowId = db.delete(PendingRequestEntry.TABLE_NAME, null, null);
+        }catch (Exception e){
+            Log.e(TAG, "<delete pending>" + e.getMessage());
+        } finally {
+            db.close();
+        }
+        return newRowId;
     }
 
 

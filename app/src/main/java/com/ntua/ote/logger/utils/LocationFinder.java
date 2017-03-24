@@ -67,14 +67,21 @@ public final class LocationFinder implements LocationListener {
     public void getLocation(Long id) {
         if(canGetLocation()) {
             pendingIds.add(id);
+            if(!isLocFinderRunning) {
+                startUsingLocation();
+            }
+        } else {
+            LocationRequest locationRequest = new LocationRequest(0, 0, 0, false);
+            OutboundController.getInstance(mContext).locationAdded(id, locationRequest);
         }
-        if(!isLocFinderRunning) {
-            startUsingLocation();
-        }
+
     }
 
     public void removeIdFromPending(Long id){
-        pendingIds.remove(id);
+        if(pendingIds.remove(id)) {
+            LocationRequest locationRequest = new LocationRequest(0, 0, 0, false);
+            OutboundController.getInstance(mContext).locationAdded(id, locationRequest);
+        }
     }
 
     public void startUsingLocation() {
@@ -143,7 +150,7 @@ public final class LocationFinder implements LocationListener {
             }
             Log.d(TAG, latitude + " " + longitude);
             CallLogDbHelper.getInstance(mContext).update(latitude, longitude, id);
-            LocationRequest locationRequest = new LocationRequest(0, latitude, longitude);
+            LocationRequest locationRequest = new LocationRequest(0, latitude, longitude, true);
             OutboundController.getInstance(mContext).locationAdded(id, locationRequest);
         }
         stopUsingLocation();
