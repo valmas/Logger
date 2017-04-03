@@ -1,6 +1,7 @@
 package com.ntua.ote.logger;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -20,6 +21,8 @@ import java.util.Map;
 
 public class OutboundController implements AsyncResponse<AsyncResponseLogDetails> {
 
+    public static final String TAG = OutboundController.class.getSimpleName();
+
     private Map<Long, InitialRequest> pendingInitialRequests;
     private Map<Long, LocationRequest> pendingLocationRequests;
     private Map<Long, DurationRequest> pendingDurationRequests;
@@ -31,6 +34,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     public static OutboundController getInstance(Context context) {
         if(ourInstance == null) {
             ourInstance = new OutboundController(context);
+        } else {
+            ourInstance.context = context;
         }
         return ourInstance;
     }
@@ -66,6 +71,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     }
 
     public synchronized void networkConnected(){
+        Log.i(TAG, "network Connected");
         if(!pendingInitialRequests.isEmpty()) {
             for (Map.Entry<Long, InitialRequest> entry : pendingInitialRequests.entrySet()) {
                 new RestClient(this).execute(RequestType.INITIAL, entry.getValue(), entry.getKey());
@@ -110,6 +116,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     }
 
     public synchronized void newEntryAdded(long localId, InitialRequest initialRequest){
+        Log.i(TAG, "new entry");
         pendingInitialRequests.put(localId, initialRequest);
         if(CommonUtils.haveNetworkConnection(context)) {
             new RestClient(this).execute(RequestType.INITIAL, initialRequest, localId);

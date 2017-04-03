@@ -32,6 +32,8 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
     public static UpdateController getInstance(Activity context) {
         if(ourInstance == null) {
             ourInstance = new UpdateController(context);
+        } else {
+            ourInstance.context = context;
         }
         return ourInstance;
     }

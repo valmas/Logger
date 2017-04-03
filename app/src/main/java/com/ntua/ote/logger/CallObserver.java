@@ -15,6 +15,8 @@ import java.util.Date;
 
 public class CallObserver extends AbstractObserver {
 
+    private static final String TAG = CallObserver.class.getName();
+
     private CallLogService service;
     private Date latestCall;
 
@@ -34,12 +36,14 @@ public class CallObserver extends AbstractObserver {
             managedCursor.moveToLast();
             if (!managedCursor.isAfterLast()) {
                 String callDate = managedCursor.getString(date);
-                Date logsLateastCall = new Date(Long.valueOf(callDate));
-                if (latestCall == null || logsLateastCall.after(latestCall)) {
-                    latestCall = logsLateastCall;
+                Date logsLatestCall = new Date(Long.valueOf(callDate));
+                Log.i(TAG, "Latest Call: "  + latestCall + " Logs latest call: " + logsLatestCall);
+                if (latestCall == null || logsLatestCall.after(latestCall)) {
+                    latestCall = logsLatestCall;
                     String phNumber = managedCursor.getString(number);
                     int callDuration = managedCursor.getInt(duration);
                     Long id = ApplicationController.getInstance().getUnfinishedCallId(phNumber);
+                    Log.i(TAG, "ID: " + id + " callDuration " + callDuration + " number: " + phNumber);
                     if(id != null) {
                         CallLogDbHelper.getInstance(service).update(callDuration, id);
                         LocationFinder.getInstance(service).removeIdFromPending(id);
@@ -49,7 +53,7 @@ public class CallObserver extends AbstractObserver {
             }
             managedCursor.close();
         } catch (SecurityException e) {
-            Log.e("CallObserver", "<on change> READ CALL LOG permission not found");
+            Log.e(TAG, "<on change> READ CALL LOG permission not found");
         }
     }
 }

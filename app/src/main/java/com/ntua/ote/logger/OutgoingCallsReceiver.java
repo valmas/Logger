@@ -26,5 +26,6 @@ public class OutgoingCallsReceiver extends BroadcastReceiver {
         String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
         LogDetails logDetails = new LogDetails(phoneNumber, new Date(), Direction.OUTGOING);
         service.storeAndSend(logDetails);
+        Log.i(TAG, "called " + phoneNumber);
     }
 }

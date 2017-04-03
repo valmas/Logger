@@ -133,7 +133,7 @@ public class CallLogService extends Service{
         logDetails.setLTE_rsrq(strengthDetails.getLTE_rsrq());
         logDetails.setLTE_rssnr(strengthDetails.getLTE_rssnr());
         logDetails.setLTE_cqi(strengthDetails.getLTE_cqi());
-        logDetails.setRat(CommonUtils.getRat(this));
+        logDetails.setRat(strengthDetails.getRat());
         logDetails.setMnc(CommonUtils.getMobileNetworkCode(this));
         logDetails.setMcc(CommonUtils.getMobileCountryCode(this));
 

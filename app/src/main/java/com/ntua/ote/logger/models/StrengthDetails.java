@@ -12,6 +12,8 @@ public class StrengthDetails {
 
     private String LTE_cqi;
 
+    private String rat;
+
     public StrengthDetails() {
     }
 
@@ -61,5 +63,13 @@ public class StrengthDetails {
 
     public void setLTE_cqi(String LTE_cqi) {
         this.LTE_cqi = LTE_cqi;
+    }
+
+    public String getRat() {
+        return rat;
+    }
+
+    public void setRat(String rat) {
+        this.rat = rat;
     }
 }

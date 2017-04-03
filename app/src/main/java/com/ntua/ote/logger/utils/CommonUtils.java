@@ -137,9 +137,7 @@ public class CommonUtils {
                 (seconds != 0 ? seconds + "sec" : "");
     }
 
-    public static String getRat(Context context){
-        TelephonyManager teleMan = (TelephonyManager)
-                context.getSystemService(Context.TELEPHONY_SERVICE);
+    public static String getRat(TelephonyManager teleMan){
         int networkType = teleMan.getNetworkType();
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_1xRTT: return "1xRTT";
@@ -150,16 +148,19 @@ public class CommonUtils {
             case TelephonyManager.NETWORK_TYPE_EVDO_A: return "EVDO rev. A";
             case TelephonyManager.NETWORK_TYPE_EVDO_B: return "EVDO rev. B";
             case TelephonyManager.NETWORK_TYPE_GPRS: return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_GSM: return "GSM";
             case TelephonyManager.NETWORK_TYPE_HSDPA: return "HSDPA";
             case TelephonyManager.NETWORK_TYPE_HSPA: return "HSPA";
             case TelephonyManager.NETWORK_TYPE_HSPAP: return "HSPA+";
             case TelephonyManager.NETWORK_TYPE_HSUPA: return "HSUPA";
             case TelephonyManager.NETWORK_TYPE_IDEN: return "iDen";
+            case TelephonyManager.NETWORK_TYPE_IWLAN: return "iWlan";
             case TelephonyManager.NETWORK_TYPE_LTE: return "LTE";
             case TelephonyManager.NETWORK_TYPE_UMTS: return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA: return "TD SCDMA";
             case TelephonyManager.NETWORK_TYPE_UNKNOWN: return "Unknown";
         }
-        return "";
+        return "" + networkType;
     }
 
     public static int getCelliId(Context context){
@@ -209,7 +210,7 @@ public class CommonUtils {
             return Integer.parseInt( cidhexSlast4S, 16 );
         } else {
             int cid3 = -1;
-            Log.e("1234", "LM | (<7 digits) cid = "+ cid3);
+            Log.e(TAG, "LM | (<7 digits) cid = "+ cid3);
             return cid3;
         }
 
@@ -318,43 +319,12 @@ public class CommonUtils {
                 }
             }
         }
-        if(TelephonyManager.NETWORK_TYPE_UNKNOWN != networkType){
-            if (android.os.Build.MODEL.equalsIgnoreCase("GT-I9305")) {
-                if (Integer.parseInt(temp[1]) != 99) {
-                    rssi = 2 * Integer.parseInt(temp[1]) - 113;
-                }  else {
-                    LTErsrp = temp[9];
-                    LTErsrq = temp[10];
-                    LTErssnr = temp[11];
-                    LTEcqi = temp[12];
-
-                    if (LTErsrp.equalsIgnoreCase("2147483647") || LTErsrp.equalsIgnoreCase("47483647")) {
-                        LTErsrp = "-1";
-                    }
-                    if (LTErsrq.equalsIgnoreCase("2147483647") ) {
-                        LTErsrq = "-1";
-                    }
-                    if (LTErssnr.equalsIgnoreCase("2147483647")) {
-                        LTErssnr = "-1";
-                    }
-                    if (LTEcqi.equalsIgnoreCase("2147483647") ) {
-                        LTEcqi = "-1";
-                    }
-
-                    if (Integer.parseInt(temp[8]) == 99) {
-                        rssi = 2 * Integer.parseInt(temp[1]) - 113;
-                    } else {
-                        LTErsrp = temp[9];
-                        rssi = Integer.parseInt(LTErsrp);
-                    }
-                }
-            }
-        }
         strengthDetails.setRssi(rssi);
         strengthDetails.setLTE_rsrp(LTErsrp);
         strengthDetails.setLTE_rsrq(LTErsrq);
         strengthDetails.setLTE_rssnr(LTErssnr);
         strengthDetails.setLTE_cqi(LTEcqi);
+        strengthDetails.setRat(getRat(tm));
     }
 
     public static PhoneDetails getPhoneDetails(TelephonyManager tm) {

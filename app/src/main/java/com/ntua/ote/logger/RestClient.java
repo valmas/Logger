@@ -44,8 +44,8 @@ public class RestClient extends AsyncTask<Object, String, AsyncResponseLogDetail
             urlConn.setDoInput (true);
             urlConn.setDoOutput (true);
             urlConn.setUseCaches(false);
-            urlConn.setRequestProperty("Content-Type", "application/json");
-            urlConn.setRequestProperty("Accept", "application/json");
+            urlConn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            urlConn.setRequestProperty("Accept", "application/json;charset=utf-8");
             urlConn.setRequestMethod("POST");
             urlConn.connect();
 
