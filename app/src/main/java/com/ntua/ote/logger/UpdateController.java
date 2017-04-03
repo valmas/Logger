@@ -72,7 +72,11 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
     }
 
     private void alertOnClick(){
-        CommonUtils.requestPermission(PermissionsMapping.DOWNLOAD_PERMISSIONS, context);
+        if(CommonUtils.havePermissions(PermissionsMapping.DOWNLOAD_PERMISSIONS, context)) {
+            download();
+        } else {
+            CommonUtils.requestPermission(PermissionsMapping.DOWNLOAD_PERMISSIONS, context);
+        }
     }
 
     public void download() {

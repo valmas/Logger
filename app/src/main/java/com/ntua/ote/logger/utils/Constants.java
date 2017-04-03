@@ -20,7 +20,9 @@ public class Constants {
 
     public static final String FILE_NAME = "update.apk";
 
+    public static final String SERVER_URL = "http://94.70.239.210:8080/logger/server/rest/log/";
+
     //public static final String SERVER_URL = "http://83.212.84.123:8080/logger/server/rest/log/";
 
-    public static final String SERVER_URL = "http://192.168.1.2:8080/logger/server/rest/log/";
+    //public static final String SERVER_URL = "http://192.168.1.3:8080/logger/server/rest/log/";
 }
