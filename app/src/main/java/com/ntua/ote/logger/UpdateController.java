@@ -44,15 +44,16 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
 
     public void checkVersion(){
         if(CommonUtils.haveNetworkConnection(context)) {
-            new UpdateClient(this).execute(RequestType.CHECK_VERSION);
+            new UpdateClient(this).execute(RequestType.CHECK_VERSION, context);
         } else {
             Toast.makeText(context, "Please enable internet connection", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void newVersionAlert(Context context, final String filename){
+    private void newVersionAlert(Context context, final String filename, final String changeLog){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("   A Newer Version is Available \n   (" + filename + ").\n   Do you Want to Download it?");
+        builder.setMessage("   A Newer Version is Available (" + filename + ").\n\n   " +
+                "Change Log:\n    " + changeLog + "\n\n   Do you Want to Download it?");
         builder.setCancelable(false);
         builder.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener(){
@@ -82,7 +83,7 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
     public void download() {
 
         if(CommonUtils.haveNetworkConnection(context)) {
-            new UpdateClient(this).execute(RequestType.UPDATE);
+            new UpdateClient(this).execute(RequestType.UPDATE, context);
         } else {
             Toast.makeText(context, "Please enable internet connection", Toast.LENGTH_SHORT).show();
         }
@@ -103,9 +104,9 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         if(output != null) {
             switch (output.getRequestType()) {
                 case CHECK_VERSION: {
-                    if (!TextUtils.isEmpty(output.getFilename()) &&
-                            ApplicationController.getVersion().compareTo(CommonUtils.getVersion(output.getFilename())) < 0) {
-                        newVersionAlert(context, output.getFilename());
+                    if (output.getVersion() != null && !TextUtils.isEmpty(output.getVersion().getVersionNumber()) &&
+                            !ApplicationController.getVersion().equals(output.getVersion().getVersionNumber())) {
+                        newVersionAlert(context, output.getVersion().getVersionNumber(), output.getVersion().getChangeLog());
                     } else {
                         Toast.makeText(context, "You Have the Most Recent Version", Toast.LENGTH_SHORT).show();
                     }

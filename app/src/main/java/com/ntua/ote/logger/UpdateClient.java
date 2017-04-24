@@ -1,10 +1,15 @@
 package com.ntua.ote.logger;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ntua.ote.logger.models.rs.AsyncResponseUpdateDetails;
+import com.ntua.ote.logger.models.rs.Version;
 import com.ntua.ote.logger.utils.AsyncResponse;
+import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.RequestType;
 
@@ -14,6 +19,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateDetails> {
 
@@ -30,16 +39,23 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
         RequestType requestType = (RequestType) params[0];
 
         try {
-            HttpURLConnection urlConn;
+            HttpsURLConnection urlConn;
             URL url = new URL (Constants.SERVER_URL + requestType.endpoint);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
             if(requestType == RequestType.CHECK_VERSION) {
-                urlConn.setRequestProperty("Accept", "text/plain");
+                urlConn.setRequestProperty("Accept", "application/json");
             } else {
                 urlConn.setRequestProperty("Accept", "application/octet-stream");
             }
             urlConn.setRequestMethod("GET");
             urlConn.setConnectTimeout(5000);
+            urlConn.setSSLSocketFactory(CommonUtils.configureSSL((Context) params[1]).getSocketFactory());
+            urlConn.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
             urlConn.connect();
 
             int statusCode = urlConn.getResponseCode();
@@ -56,7 +72,9 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
                     }
                     br.close();
                     Log.i(sb.toString() , TAG);
-                    return new AsyncResponseUpdateDetails(sb.toString(), requestType);
+                    Gson builder = new GsonBuilder().create();
+                    Version version = builder.fromJson(sb.toString(), Version.class);
+                    return new AsyncResponseUpdateDetails(version, requestType);
                 } else {
                     BufferedInputStream bufferinstream = new BufferedInputStream(urlConn.getInputStream());
                     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -81,7 +99,6 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
 
         return null;
     }
-
 
     @Override
     protected void onPostExecute(AsyncResponseUpdateDetails result) {

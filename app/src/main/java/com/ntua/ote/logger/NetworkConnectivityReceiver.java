@@ -12,7 +12,7 @@ public class NetworkConnectivityReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(CommonUtils.haveNetworkConnection(context)){
+        if(CommonUtils.haveNetworkConnectionPermitted(context)){
             OutboundController.getInstance(context).networkConnected();
         }
     }

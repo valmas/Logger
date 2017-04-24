@@ -20,7 +20,7 @@ public class ApplicationController {
         return ourInstance;
     }
 
-    public static final String VERSION = "logger_v1.1";
+    public static final String VERSION = "logger_v1.2";
 
     private Map<String, Long> unfinishedCalls;
 

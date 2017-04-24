@@ -74,14 +74,14 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         Log.i(TAG, "network Connected");
         if(!pendingInitialRequests.isEmpty()) {
             for (Map.Entry<Long, InitialRequest> entry : pendingInitialRequests.entrySet()) {
-                new RestClient(this).execute(RequestType.INITIAL, entry.getValue(), entry.getKey());
+                new RestClient(this).execute(RequestType.INITIAL, entry.getValue(), entry.getKey(), context);
             }
         }
         sendSubsequentRequests();
     }
 
     public synchronized void serviceStarted(){
-//        if(CommonUtils.haveNetworkConnection(context)) {
+//        if(CommonUtils.haveNetworkConnectionPermitted(context)) {
 //            networkConnected();
 //        }
     }
@@ -93,10 +93,10 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
                     long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(entry.getKey());
                     if(remoteId > 0) {
                         entry.getValue().setRowId(remoteId);
-                        new RestClient(this).execute(RequestType.LOCATION, entry.getValue(), entry.getKey());
+                        new RestClient(this).execute(RequestType.LOCATION, entry.getValue(), entry.getKey(), context);
                     }
                 } else {
-                    new RestClient(this).execute(RequestType.LOCATION, entry.getValue(), entry.getKey());
+                    new RestClient(this).execute(RequestType.LOCATION, entry.getValue(), entry.getKey(), context);
                 }
             }
         }
@@ -106,10 +106,10 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
                     long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(entry.getKey());
                     if(remoteId > 0) {
                         entry.getValue().setRowId(remoteId);
-                        new RestClient(this).execute(RequestType.DURATION, entry.getValue(), entry.getKey());
+                        new RestClient(this).execute(RequestType.DURATION, entry.getValue(), entry.getKey(), context);
                     }
                 } else {
-                    new RestClient(this).execute(RequestType.DURATION, entry.getValue(), entry.getKey());
+                    new RestClient(this).execute(RequestType.DURATION, entry.getValue(), entry.getKey(), context);
                 }
             }
         }
@@ -118,8 +118,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     public synchronized void newEntryAdded(long localId, InitialRequest initialRequest){
         Log.i(TAG, "new entry");
         pendingInitialRequests.put(localId, initialRequest);
-        if(CommonUtils.haveNetworkConnection(context)) {
-            new RestClient(this).execute(RequestType.INITIAL, initialRequest, localId);
+        if(CommonUtils.haveNetworkConnectionPermitted(context)) {
+            new RestClient(this).execute(RequestType.INITIAL, initialRequest, localId, context);
         }
     }
 
@@ -127,22 +127,22 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         if(!pendingLocationRequests.containsKey(localId)) {
             pendingLocationRequests.put(localId, locationRequest);
         }
-        if(CommonUtils.haveNetworkConnection(context)) {
+        if(CommonUtils.haveNetworkConnectionPermitted(context)) {
             long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(localId);
             if(remoteId > 0) {
                 locationRequest.setRowId(remoteId);
-                new RestClient(this).execute(RequestType.LOCATION, locationRequest, localId);
+                new RestClient(this).execute(RequestType.LOCATION, locationRequest, localId, context);
             }
         }
     }
 
     public synchronized void durationAdded(long localId, DurationRequest durationRequest){
         pendingDurationRequests.put(localId, durationRequest);
-        if(CommonUtils.haveNetworkConnection(context)) {
+        if(CommonUtils.haveNetworkConnectionPermitted(context)) {
             long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(localId);
             if(remoteId > 0) {
                 durationRequest.setRowId(remoteId);
-                new RestClient(this).execute(RequestType.DURATION, durationRequest, localId);
+                new RestClient(this).execute(RequestType.DURATION, durationRequest, localId, context);
             }
         }
     }
@@ -158,12 +158,12 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
                     if(pendingLocationRequests.get(localId) != null) {
                         pendingLocationRequests.get(localId).setRowId(output.getRemoteId());
                         new RestClient(this).execute(RequestType.LOCATION,
-                                pendingLocationRequests.get(localId), localId);
+                                pendingLocationRequests.get(localId), localId, context);
                     }
                     if(pendingDurationRequests.get(localId) != null) {
                         pendingDurationRequests.get(localId).setRowId(output.getRemoteId());
                         new RestClient(this).execute(RequestType.DURATION,
-                                pendingDurationRequests.get(localId), localId);
+                                pendingDurationRequests.get(localId), localId, context);
                     }
                     break;
                 case LOCATION:

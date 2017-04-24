@@ -19,16 +19,30 @@ import android.util.Log;
 
 import com.jaredrummler.android.device.DeviceName;
 import com.ntua.ote.logger.ApplicationController;
+import com.ntua.ote.logger.R;
 import com.ntua.ote.logger.SettingsActivity;
 import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.StrengthDetails;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 public class CommonUtils {
 
@@ -92,7 +106,7 @@ public class CommonUtils {
         return builder.toString();
     }
 
-    public static boolean haveNetworkConnection(Context context) {
+    public static boolean haveNetworkConnectionPermitted(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         boolean uploadUsingData = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_DATA, false);
         boolean uploadUsingWifi = sharedPref.getBoolean(SettingsActivity.KEY_PREF_UPLOAD_WIFI, false);
@@ -105,6 +119,16 @@ public class CommonUtils {
         if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("WIFI") && !uploadUsingData) {
             return true;
         } else if (netInfo != null && netInfo.getTypeName().equalsIgnoreCase("MOBILE") && !uploadUsingWifi){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean haveNetworkConnection(Context context) {
+        ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = conMan.getActiveNetworkInfo();
+        if (netInfo != null && (netInfo.getTypeName().equalsIgnoreCase("WIFI")
+                || netInfo.getTypeName().equalsIgnoreCase("MOBILE"))) {
             return true;
         }
         return false;
@@ -360,5 +384,38 @@ public class CommonUtils {
         String version = filename.substring(8, filename.length() - 4);
 
         return version;
+    }
+
+    public static SSLContext configureSSL(Context context){
+        SSLContext sslContext = null;
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            InputStream caInput = context.getResources().openRawResource(R.raw.server);
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(caInput);
+                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+            } finally {
+                caInput.close();
+            }
+
+            // Create a KeyStore containing our trusted CAs
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+            // Create a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            // Create an SSLContext that uses our TrustManager
+            sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, tmf.getTrustManagers(), null);
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            e.printStackTrace();
+        }
+        return sslContext;
     }
 }

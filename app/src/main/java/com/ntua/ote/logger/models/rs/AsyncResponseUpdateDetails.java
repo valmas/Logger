@@ -4,12 +4,12 @@ import com.ntua.ote.logger.utils.RequestType;
 
 public class AsyncResponseUpdateDetails {
 
-    private String filename;
+    private Version version;
     private RequestType requestType;
     private byte[] content;
 
-    public AsyncResponseUpdateDetails(String filename, RequestType requestType) {
-        this.filename = filename;
+    public AsyncResponseUpdateDetails(Version version, RequestType requestType) {
+        this.version = version;
         this.requestType = requestType;
     }
 
@@ -18,12 +18,12 @@ public class AsyncResponseUpdateDetails {
         this.requestType = requestType;
     }
 
-    public String getFilename() {
-        return filename;
+    public Version getVersion() {
+        return version;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     public byte[] getContent() {

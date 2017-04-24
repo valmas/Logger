@@ -1,5 +1,6 @@
 package com.ntua.ote.logger;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -7,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ntua.ote.logger.models.AsyncResponseLogDetails;
 import com.ntua.ote.logger.utils.AsyncResponse;
+import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.RequestType;
 
@@ -16,6 +18,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 public class RestClient extends AsyncTask<Object, String, AsyncResponseLogDetails> {
 
@@ -38,15 +44,22 @@ public class RestClient extends AsyncTask<Object, String, AsyncResponseLogDetail
                     .setDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").create();
             String json= gson.toJson(params[1]);
             Log.i("data map", json);
-            HttpURLConnection urlConn;
+            HttpsURLConnection urlConn;
             URL url = new URL (Constants.SERVER_URL + requestType.endpoint);
-            urlConn = (HttpURLConnection) url.openConnection();
+            urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setDoInput (true);
             urlConn.setDoOutput (true);
             urlConn.setUseCaches(false);
             urlConn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
             urlConn.setRequestProperty("Accept", "application/json;charset=utf-8");
             urlConn.setRequestMethod("POST");
+            urlConn.setSSLSocketFactory(CommonUtils.configureSSL((Context) params[3]).getSocketFactory());
+            urlConn.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
             urlConn.connect();
 
             OutputStream os = urlConn.getOutputStream();
