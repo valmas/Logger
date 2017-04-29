@@ -18,7 +18,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.jaredrummler.android.device.DeviceName;
-import com.ntua.ote.logger.ApplicationController;
 import com.ntua.ote.logger.R;
 import com.ntua.ote.logger.SettingsActivity;
 import com.ntua.ote.logger.models.PhoneDetails;
@@ -40,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -127,15 +127,12 @@ public class CommonUtils {
     public static boolean haveNetworkConnection(Context context) {
         ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conMan.getActiveNetworkInfo();
-        if (netInfo != null && (netInfo.getTypeName().equalsIgnoreCase("WIFI")
-                || netInfo.getTypeName().equalsIgnoreCase("MOBILE"))) {
-            return true;
-        }
-        return false;
+        return netInfo != null && (netInfo.getTypeName().equalsIgnoreCase("WIFI")
+                || netInfo.getTypeName().equalsIgnoreCase("MOBILE"));
     }
 
     public static Date stringToDate(String dateString){
-        DateFormat df = new SimpleDateFormat(Constants.DATE_TIME_FORMAT);
+        DateFormat df = new SimpleDateFormat(Constants.DATE_TIME_FORMAT, Locale.US);
         Date d;
         try {
             d = df.parse(dateString);
@@ -148,7 +145,7 @@ public class CommonUtils {
     }
 
     public static String dateToString(Date date, String format){
-        DateFormat df = new SimpleDateFormat(format);
+        DateFormat df = new SimpleDateFormat(format, Locale.US);
         return df.format(date);
     }
 
@@ -380,23 +377,14 @@ public class CommonUtils {
         return 0;
     }
 
-    public static String getVersion(String filename){
-        String version = filename.substring(8, filename.length() - 4);
-
-        return version;
-    }
-
     public static SSLContext configureSSL(Context context){
         SSLContext sslContext = null;
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            InputStream caInput = context.getResources().openRawResource(R.raw.server);
             Certificate ca;
-            try {
+            try (InputStream caInput = context.getResources().openRawResource(R.raw.server)) {
                 ca = cf.generateCertificate(caInput);
                 System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
-            } finally {
-                caInput.close();
             }
 
             // Create a KeyStore containing our trusted CAs
@@ -418,4 +406,5 @@ public class CommonUtils {
         }
         return sslContext;
     }
+
 }

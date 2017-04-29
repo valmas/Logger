@@ -53,6 +53,7 @@ public class RestClient extends AsyncTask<Object, String, AsyncResponseLogDetail
             urlConn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
             urlConn.setRequestProperty("Accept", "application/json;charset=utf-8");
             urlConn.setRequestMethod("POST");
+            urlConn.setConnectTimeout(5000);
             urlConn.setSSLSocketFactory(CommonUtils.configureSSL((Context) params[3]).getSocketFactory());
             urlConn.setHostnameVerifier(new HostnameVerifier() {
                 @Override

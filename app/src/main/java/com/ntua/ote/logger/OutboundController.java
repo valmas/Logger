@@ -8,11 +8,13 @@ import com.google.gson.reflect.TypeToken;
 import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.db.CallLogDbSchema;
 import com.ntua.ote.logger.models.AsyncResponseLogDetails;
+import com.ntua.ote.logger.models.rs.AuthenticationRequest;
 import com.ntua.ote.logger.models.rs.DurationRequest;
 import com.ntua.ote.logger.models.rs.InitialRequest;
 import com.ntua.ote.logger.models.rs.LocationRequest;
 import com.ntua.ote.logger.utils.AsyncResponse;
 import com.ntua.ote.logger.utils.CommonUtils;
+import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.RequestType;
 
 import java.lang.reflect.Type;
@@ -117,6 +119,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
 
     public synchronized void newEntryAdded(long localId, InitialRequest initialRequest){
         Log.i(TAG, "new entry");
+        setAuthentication(initialRequest);
         pendingInitialRequests.put(localId, initialRequest);
         if(CommonUtils.haveNetworkConnectionPermitted(context)) {
             new RestClient(this).execute(RequestType.INITIAL, initialRequest, localId, context);
@@ -124,6 +127,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     }
 
     public synchronized void locationAdded(long localId, LocationRequest locationRequest){
+        setAuthentication(locationRequest);
         if(!pendingLocationRequests.containsKey(localId)) {
             pendingLocationRequests.put(localId, locationRequest);
         }
@@ -137,6 +141,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
     }
 
     public synchronized void durationAdded(long localId, DurationRequest durationRequest){
+        setAuthentication(durationRequest);
         pendingDurationRequests.put(localId, durationRequest);
         if(CommonUtils.haveNetworkConnectionPermitted(context)) {
             long remoteId = CallLogDbHelper.getInstance(context).getRemoteId(localId);
@@ -192,5 +197,10 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
         CallLogDbHelper.getInstance(context).insertPending(initial, location, duration);
         ourInstance=null;
+    }
+
+    private void setAuthentication(AuthenticationRequest authRequest){
+        authRequest.setUserName(Constants.SERVER_USERNAME);
+        authRequest.setPassword(Constants.SERVER_PASSWORD);
     }
 }

@@ -1,6 +1,6 @@
 package com.ntua.ote.logger.models.rs;
 
-public class LocationRequest {
+public class LocationRequest extends AuthenticationRequest {
 
 	private long rowId;
 	private double latitude;

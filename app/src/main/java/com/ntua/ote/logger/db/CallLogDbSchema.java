@@ -7,7 +7,7 @@ public final  class CallLogDbSchema {
     public CallLogDbSchema() {}
 
     public static abstract class CallLogEntry implements BaseColumns {
-        public static final String TABLE_NAME = "callLog";
+        public static final String TABLE_NAME = "log";
         public static final String COLUMN_NAME_ID = "_id";
         public static final String COLUMN_NAME_TYPE = "type";
         public static final String COLUMN_NAME_EXT_NUM = "externalNumber";

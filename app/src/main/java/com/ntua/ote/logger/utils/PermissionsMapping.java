@@ -13,7 +13,6 @@ public enum PermissionsMapping {
                                Manifest.permission.INTERNET,
                                Manifest.permission.ACCESS_NETWORK_STATE}, 1),
     REBOOT_NOTIF(new String[]{Manifest.permission.RECEIVE_BOOT_COMPLETED}, 0),
-    INSTALL_PERMISSIONS(new String[]{Manifest.permission.INSTALL_PACKAGES}, 3),
     DOWNLOAD_PERMISSIONS(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE}, 3),
     INIT_PERMISSIONS(new String[]{Manifest.permission.READ_PHONE_STATE}, 2);

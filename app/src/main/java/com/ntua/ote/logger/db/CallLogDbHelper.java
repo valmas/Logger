@@ -26,7 +26,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     private static CallLogDbHelper sInstance;
     private CallLogService service;
 
-    public static final int DATABASE_VERSION = 13;
+    public static final int DATABASE_VERSION = 14;
     public static final String DATABASE_NAME = "logger.db";
     public static final String TAG = CallLogDbHelper.class.getName();
 

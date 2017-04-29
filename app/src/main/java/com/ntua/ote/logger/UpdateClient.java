@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ntua.ote.logger.models.rs.AsyncResponseUpdateDetails;
+import com.ntua.ote.logger.models.rs.AuthenticationRequest;
 import com.ntua.ote.logger.models.rs.Version;
 import com.ntua.ote.logger.utils.AsyncResponse;
 import com.ntua.ote.logger.utils.CommonUtils;
@@ -17,6 +18,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -39,15 +42,24 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
         RequestType requestType = (RequestType) params[0];
 
         try {
+            Gson gson = new GsonBuilder().create();
+            AuthenticationRequest authRequest = new AuthenticationRequest();
+            authRequest.setUserName(Constants.SERVER_USERNAME);
+            authRequest.setPassword(Constants.SERVER_PASSWORD);
+            String json= gson.toJson(authRequest);
             HttpsURLConnection urlConn;
             URL url = new URL (Constants.SERVER_URL + requestType.endpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
+            urlConn.setDoInput (true);
+            urlConn.setDoOutput (true);
+            urlConn.setUseCaches(false);
+            urlConn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
             if(requestType == RequestType.CHECK_VERSION) {
                 urlConn.setRequestProperty("Accept", "application/json");
             } else {
                 urlConn.setRequestProperty("Accept", "application/octet-stream");
             }
-            urlConn.setRequestMethod("GET");
+            urlConn.setRequestMethod("POST");
             urlConn.setConnectTimeout(5000);
             urlConn.setSSLSocketFactory(CommonUtils.configureSSL((Context) params[1]).getSocketFactory());
             urlConn.setHostnameVerifier(new HostnameVerifier() {
@@ -57,6 +69,12 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
                 }
             });
             urlConn.connect();
+
+            OutputStream os = urlConn.getOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            osw.write(json);
+            osw.flush ();
+            osw.close ();
 
             int statusCode = urlConn.getResponseCode();
             Log.i(statusCode + "", TAG);
@@ -79,7 +97,7 @@ public class UpdateClient extends AsyncTask<Object, String, AsyncResponseUpdateD
                     BufferedInputStream bufferinstream = new BufferedInputStream(urlConn.getInputStream());
                     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                     byte[] data = new byte[500];
-                    int current = 0;
+                    int current;
 
                     while((current = bufferinstream.read(data,0,data.length)) != -1){
                         buffer.write(data,0,current);

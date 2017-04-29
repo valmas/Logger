@@ -25,4 +25,8 @@ public class Constants {
     //public static final String SERVER_URL = "https://83.212.84.123:8443/logger/server/rest/log/";
 
     public static final String SERVER_URL = "https://192.168.1.5:8443/logger/server/rest/log/";
+
+    public static final String SERVER_USERNAME = "admin";
+
+    public static final String SERVER_PASSWORD = "12345678";
 }

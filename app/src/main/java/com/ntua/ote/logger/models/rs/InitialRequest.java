@@ -5,7 +5,7 @@ import com.ntua.ote.logger.utils.LogType;
 
 import java.util.Date;
 
-public class InitialRequest {
+public class InitialRequest extends AuthenticationRequest {
 
 	private String brandModel;
 

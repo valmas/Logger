@@ -7,7 +7,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.ntua.ote.logger.models.PhoneDetails;
-import com.ntua.ote.logger.models.rs.InitialRequest;
 import com.ntua.ote.logger.utils.CommonUtils;
 
 import java.util.HashMap;
@@ -20,7 +19,7 @@ public class ApplicationController {
         return ourInstance;
     }
 
-    public static final String VERSION = "logger_v1.2";
+    public static final String VERSION = "1.3";
 
     private Map<String, Long> unfinishedCalls;
 
@@ -55,7 +54,4 @@ public class ApplicationController {
         return phoneDetails;
     }
 
-    public static String getVersion(){
-        return VERSION.split(".v")[1];
-    }
 }

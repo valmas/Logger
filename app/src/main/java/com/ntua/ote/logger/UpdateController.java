@@ -105,7 +105,7 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
             switch (output.getRequestType()) {
                 case CHECK_VERSION: {
                     if (output.getVersion() != null && !TextUtils.isEmpty(output.getVersion().getVersionNumber()) &&
-                            !ApplicationController.getVersion().equals(output.getVersion().getVersionNumber())) {
+                            !ApplicationController.VERSION.equals(output.getVersion().getVersionNumber())) {
                         newVersionAlert(context, output.getVersion().getVersionNumber(), output.getVersion().getChangeLog());
                     } else {
                         Toast.makeText(context, "You Have the Most Recent Version", Toast.LENGTH_SHORT).show();

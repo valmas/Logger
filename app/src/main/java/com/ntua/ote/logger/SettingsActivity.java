@@ -5,16 +5,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.ToggleButton;
 
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.PermissionsMapping;
@@ -28,7 +25,6 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String KEY_PREF_UPLOAD_WIFI_DATA = "pref_wifiData";
     public static final String KEY_PREF_MSISDN = "pref_msisdn";
     public static final String KEY_PREF_UPDATE = "pref_update";
-    public static final String KEY_PREF_SERVER_URL = "pref_server_url";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +65,6 @@ public class SettingsActivity extends AppCompatActivity {
                 } else {
                     UpdateController.getInstance(this).download();
                 }
-                return;
             }
         }
     }
@@ -131,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             Preference button = findPreference(KEY_PREF_UPDATE);
-            button.setSummary(getString(R.string.current_version) + " " + ApplicationController.getVersion());
+            button.setSummary(getString(R.string.current_version) + " " + ApplicationController.VERSION);
 
             button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
