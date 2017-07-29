@@ -5,7 +5,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.LoaderManager;
@@ -13,7 +12,6 @@ import android.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,23 +20,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.db.CallLogDbSchema;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.Direction;
 import com.ntua.ote.logger.utils.LogType;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
 public class CallsViewActivity extends AppCompatActivity {
-
-    private static final String TAG = CallsViewActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +43,7 @@ public class CallsViewActivity extends AppCompatActivity {
         initFromPreferences();
 
         getFragmentManager().beginTransaction()
-                .add(R.id.list_view_layout, new CallListFragment())
-                .commit();
+                .add(R.id.list_view_layout, new CallListFragment()).commit();
     }
 
     public void initFromPreferences(){
@@ -85,12 +75,10 @@ public class CallsViewActivity extends AppCompatActivity {
                     FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
             progressBar.setIndeterminate(true);
 
-
-            Bundle b = getActivity().getIntent().getExtras();;
+            Bundle b = getActivity().getIntent().getExtras();
             final LogType type = b == null ? null :
                     LogType.parseCode(b.getInt(Constants.LOG_TYPE_KEY));
 
-            // Must add the progress bar to the root of the layout
             ViewGroup root = (ViewGroup) getActivity().findViewById(android.R.id.content);
             root.addView(progressBar);
 
@@ -101,7 +89,6 @@ public class CallsViewActivity extends AppCompatActivity {
                     CallLogDbSchema.CallLogEntry.COLUMN_NAME_DIRECTION};
 
             int[] toViews = {R.id.external_number, R.id.date_time, R.id.duration, R.id.direction};
-
 
             // Create an empty adapter we will use to display the loaded data.
             // We pass null for the cursor, then update it in onLoadFinished()
@@ -135,52 +122,40 @@ public class CallsViewActivity extends AppCompatActivity {
                             ImageView iv = (ImageView) aView;
                             if(type == LogType.CALL) {
                                 if (Direction.OUTGOING == direction) {
-                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.outgoing));
+                                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.outgoing, getResources()));
                                 } else if (Direction.INCOMING == direction) {
-                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.incoming));
+                                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.incoming, getResources()));
                                 }
                             } else if (type == LogType.SMS) {
                                 if (Direction.OUTGOING == direction) {
-                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsoutgoing));
+                                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.smsoutgoing, getResources()));
                                 } else if (Direction.INCOMING == direction) {
-                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsincoming));
+                                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.smsincoming, getResources()));
                                 }
                             }
                             return true;
-
                     }
-
                     return false;
                 }
             });
             setListAdapter(mAdapter);
-
             getListView().setEmptyView(getActivity().findViewById(android.R.id.empty));
-
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
             getLoaderManager().initLoader(0, b, this);
-
         }
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            LogType type = args == null ? null :
-                    LogType.parseCode(args.getInt(Constants.LOG_TYPE_KEY));
-            return new CursorLoader(getActivity(), null,
-                    CallLogDbHelper.LIST_PROJECTION, CallLogDbHelper.selectionByType, new String[]{type.code + ""}, null)
+            LogType type = args == null ? null : LogType.parseCode(args.getInt(Constants.LOG_TYPE_KEY));
+            return new CursorLoader(getActivity(), null, CallLogDbHelper.LIST_PROJECTION,
+                    CallLogDbHelper.selectionByType, new String[]{(type != null ? type.code : 0) + ""}, null)
             {
                 @Override
-                public Cursor loadInBackground()
-                {
-                    Cursor c = CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection(), getSelectionArgs());
-                    if(c == null || c.isAfterLast()) {
-                        Log.d("empty", TAG);
-                    }
-                    return c;
+                public Cursor loadInBackground() {
+                    return CallLogDbHelper.getInstance(getContext()).getDataForList(getProjection(), getSelection(), getSelectionArgs());
                 }
             };
-
         }
 
         @Override

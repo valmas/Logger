@@ -12,10 +12,8 @@ public class BootEventReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         boolean value = sharedPref.getBoolean(SettingsActivity.KEY_PREF_RUN_ON_START, false);
-
         if(value) {
             Intent startServiceIntent = new Intent(context, CallLogService.class);
             context.startService(startServiceIntent);

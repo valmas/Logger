@@ -4,20 +4,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.ntua.ote.logger.models.rs.AsyncResponseUpdateDetails;
 import com.ntua.ote.logger.utils.AsyncResponse;
 import com.ntua.ote.logger.utils.CommonUtils;
 import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.PermissionsMapping;
 import com.ntua.ote.logger.utils.RequestType;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,16 +83,6 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         } else {
             Toast.makeText(context, "Please enable internet connection", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void install_apk() {
-        Intent install = new Intent(Intent.ACTION_VIEW);
-        install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        File file = new File(context.getFilesDir(), Constants.FILE_NAME);
-        install.setDataAndType(Uri.fromFile(file),
-                "application/vnd.android.package-archive");
-        context.startActivity(install);
-        context.finish();
     }
 
     @Override

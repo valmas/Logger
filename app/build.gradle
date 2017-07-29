@@ -32,6 +32,8 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
+
+    //external libraries
     compile 'com.jaredrummler:android-device-names:1.0.9'
     compile 'com.google.android.gms:play-services:10.2.0'
     compile 'com.google.code.gson:gson:2.4'

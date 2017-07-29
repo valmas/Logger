@@ -3,15 +3,10 @@ package com.ntua.ote.logger.models;
 public class StrengthDetails {
 
     private int rssi;
-
     private String LTE_rsrp;
-
     private String LTE_rsrq;
-
     private String LTE_rssnr;
-
     private String LTE_cqi;
-
     private String rat;
 
     public StrengthDetails() {

@@ -17,7 +17,6 @@ import com.ntua.ote.logger.utils.Constants;
 import com.ntua.ote.logger.utils.Direction;
 import com.ntua.ote.logger.utils.LogType;
 
-
 public class ViewEntryActivity extends AppCompatActivity {
 
     private LogDetails logDetails;
@@ -64,24 +63,22 @@ public class ViewEntryActivity extends AppCompatActivity {
                 aView = (TextView) findViewById(R.id.duration);
                 aView.setVisibility(View.GONE);
             }
-
             int directionCode = logDetails.getDirection().code;
             Direction direction = Direction.parseCode(directionCode);
             ImageView iv = (ImageView) findViewById(R.id.direction);
             if(Direction.OUTGOING == direction) {
                 if(logDetails.getType() == LogType.CALL) {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.outgoing));
+                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.outgoing, getResources()));
                 } else {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsoutgoing));
+                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.smsoutgoing, getResources()));
                 }
             } else if(Direction.INCOMING == direction) {
                 if(logDetails.getType() == LogType.CALL) {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.incoming));
+                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.incoming, getResources()));
                 } else {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.smsincoming));
+                    iv.setImageDrawable(CommonUtils.getDrawable(R.drawable.smsincoming, getResources()));
                 }
             }
-
             if(logDetails.getLatitude() == 0.0 || logDetails.getLongitude() == 0.0) {
                 Button btn = (Button) findViewById(R.id.show_location_btn);
                 btn.setEnabled(false);
@@ -89,25 +86,18 @@ public class ViewEntryActivity extends AppCompatActivity {
 
             aView = (TextView) findViewById(R.id.cell_id);
             aView.setText(String.valueOf(logDetails.getCellId()));
-
             aView = (TextView) findViewById(R.id.lac);
             aView.setText(String.valueOf(logDetails.getLac()));
-
             aView = (TextView) findViewById(R.id.rat);
             aView.setText(String.valueOf(logDetails.getRat()));
-
             aView = (TextView) findViewById(R.id.rssi);
             aView.setText(String.valueOf(logDetails.getRssi()));
-
             aView = (TextView) findViewById(R.id.rsrp);
             aView.setText(String.valueOf(logDetails.getLTE_rsrp()));
-
             aView = (TextView) findViewById(R.id.rsrq);
             aView.setText(String.valueOf(logDetails.getLTE_rsrq()));
-
             aView = (TextView) findViewById(R.id.rssnr);
             aView.setText(String.valueOf(logDetails.getLTE_rssnr()));
-
             aView = (TextView) findViewById(R.id.cqi);
             aView.setText(String.valueOf(logDetails.getLTE_cqi()));
         }

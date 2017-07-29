@@ -20,6 +20,7 @@ import com.ntua.ote.logger.utils.LogType;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class CallLogDbHelper extends SQLiteOpenHelper {
 
@@ -41,7 +42,6 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             CallLogDbSchema.CallLogEntry.COLUMN_NAME_DIRECTION};
 
     public static synchronized CallLogDbHelper getInstance(Context context) {
-
         if (sInstance == null) {
             sInstance = new CallLogDbHelper(context.getApplicationContext());
         }
@@ -67,13 +67,11 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     }
 
     public long insert(LogDetails logDetails){
-        SQLiteDatabase db = this.getWritableDatabase();
         long newRowId = -1;
-        try {
-            // Create a new map of values, where column names are the keys
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(CallLogEntry.COLUMN_NAME_EXT_NUM, logDetails.getExternalNumber());
-            DateFormat df = new SimpleDateFormat(Constants.DATE_TIME_FORMAT);
+            DateFormat df = new SimpleDateFormat(Constants.DATE_TIME_FORMAT, Locale.US);
             String strDate = df.format(logDetails.getDateTime());
             values.put(CallLogEntry.COLUMN_NAME_DATE, strDate);
             values.put(CallLogEntry.COLUMN_NAME_DIRECTION, logDetails.getDirection().code);
@@ -94,117 +92,81 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
             newRowId = db.insert(CallLogEntry.TABLE_NAME, null, values);
 
             service.dbUpdated(1);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "<insert>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return newRowId;
     }
 
     public long getCallCount(){
-        SQLiteDatabase db = this.getReadableDatabase();
         long count = 0;
-        try {
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
             count = DatabaseUtils.queryNumEntries(db, CallLogEntry.TABLE_NAME, selectionByType, new String[]{"0"});
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.d(TAG, "<getCount>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return count;
     }
 
     public long getSmsCount(){
-        SQLiteDatabase db = this.getReadableDatabase();
         long count = 0;
-        try {
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
             count = DatabaseUtils.queryNumEntries(db, CallLogEntry.TABLE_NAME, selectionByType, new String[]{"1"});
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.d(TAG, "<getCount>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return count;
     }
 
     public Cursor getDataForList(String[] projection, String selection, String[] args){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.query(
-                CallLogEntry.TABLE_NAME,  // The table to query
-                projection,                               // The columns to return
-                selection,                                // The columns for the WHERE clause
-                args,                       // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                CallLogEntry.COLUMN_NAME_DATE + " DESC"                                      // The sort order
-        );
-
-        return c;
+        try {
+            return db.query(CallLogEntry.TABLE_NAME, projection, selection, args, null, null,
+                CallLogEntry.COLUMN_NAME_DATE + " DESC");
+        } catch (Exception e) {
+            Log.d(TAG, "<getDataForList>" + e.getMessage());
+        }
+        return null;
     }
 
     public LogDetails getAllData(Long id){
-        SQLiteDatabase db = this.getReadableDatabase();
-        String[] selectionArgs = { id + "" };
-        Cursor c = db.query(
-                CallLogEntry.TABLE_NAME,
-                CallLogDbSchema.WHOLE_PROJECTION,
-                selection,
-                selectionArgs,                       // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                null                                      // The sort order
-        );
-        c.moveToFirst();
-        return convertCursorToModel(c);
+        LogDetails logDetails = null;
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
+            String[] selectionArgs = { id + "" };
+            Cursor c = db.query(CallLogEntry.TABLE_NAME, CallLogDbSchema.WHOLE_PROJECTION, selection,
+                    selectionArgs, null, null, null);
+            c.moveToFirst();
+            logDetails = convertCursorToModel(c);
+            c.close();
+        } catch (Exception e) {
+            Log.d(TAG, "<getAllData>" + e.getMessage());
+        }
+        return logDetails;
     }
 
     public int update(int duration, long id){
-        SQLiteDatabase db = this.getReadableDatabase();
         int count = 0;
-        try {
-            // New value for one column
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(CallLogEntry.COLUMN_NAME_DURATION, duration);
-
-            // Which row to update, based on the ID
-            String[] selectionArgs = { id + "" };
-
-            count = db.update(
-                    CallLogEntry.TABLE_NAME,
-                    values,
-                    selection,
-                    selectionArgs);
-        }catch (Exception e){
+            String[] selectionArgs = {id + ""};
+            count = db.update(CallLogEntry.TABLE_NAME, values, selection, selectionArgs);
+        } catch (Exception e) {
             Log.d(TAG, "<update>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return count == 0 ? -1 : 1;
     }
 
     public int update(double latitude, double longitude, long id){
-        SQLiteDatabase db = this.getReadableDatabase();
         int count = 0;
-        try {
-            // New value for one column
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(CallLogEntry.COLUMN_NAME_LATITUDE, latitude);
             values.put(CallLogEntry.COLUMN_NAME_LONGITUDE, longitude);
-
-            // Which row to update, based on the ID
-
-            String[] selectionArgs = { id + "" };
-
-            count = db.update(
-                    CallLogEntry.TABLE_NAME,
-                    values,
-                    selection,
-                    selectionArgs);
-        }catch (Exception e){
+            String[] selectionArgs = {id + ""};
+            count = db.update(CallLogEntry.TABLE_NAME, values, selection, selectionArgs);
+        } catch (Exception e) {
             Log.d(TAG, "<update>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return count == 0 ? -1 : 1;
     }
@@ -239,108 +201,70 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
     }
 
     public long getRemoteId(long id){
-        SQLiteDatabase db = this.getReadableDatabase();
         String[] selectionArgs = { id + "" };
         long remoteId = -1;
-        try {
-            Cursor c = db.query(
-                    CallLogEntry.TABLE_NAME,
-                    new String[]{CallLogEntry.COLUMN_NAME_REMOTE_ID},
-                    selection,
-                    selectionArgs,                       // The values for the WHERE clause
-                    null,                                     // don't group the rows
-                    null,                                     // don't filter by row groups
-                    null                                      // The sort order
-            );
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
+            Cursor c = db.query(CallLogEntry.TABLE_NAME, new String[]{CallLogEntry.COLUMN_NAME_REMOTE_ID},
+                    selection, selectionArgs, null, null, null);
             c.moveToFirst();
-            if(!c.isAfterLast()) {
-                return c.getLong(c.getColumnIndex(CallLogEntry.COLUMN_NAME_REMOTE_ID));
-            }
-        }catch (Exception e){
+            remoteId = c.isAfterLast() ? -1 : c.getLong(c.getColumnIndex(CallLogEntry.COLUMN_NAME_REMOTE_ID));
+            c.close();
+        } catch (Exception e) {
             Log.d(TAG, "<getCount>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return remoteId;
     }
 
     public long setRemoteId(long id, long remoteId){
-        SQLiteDatabase db = this.getReadableDatabase();
         int count = 0;
-        try {
-            // New value for one column
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(CallLogEntry.COLUMN_NAME_REMOTE_ID, remoteId);
-
-            // Which row to update, based on the ID
-
-            String[] selectionArgs = { id + "" };
-
-            count = db.update(
-                    CallLogEntry.TABLE_NAME,
-                    values,
-                    selection,
-                    selectionArgs);
-        }catch (Exception e){
+            String[] selectionArgs = {id + ""};
+            count = db.update(CallLogEntry.TABLE_NAME, values, selection, selectionArgs);
+        } catch (Exception e) {
             Log.d(TAG, "<update>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return count == 0 ? -1 : 1;
     }
 
     public long insertPending(String initial, String location, String duration){
-        SQLiteDatabase db = this.getWritableDatabase();
         long newRowId = -1;
-        try {
-            // Create a new map of values, where column names are the keys
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(PendingRequestEntry.COLUMN_NAME_INITIAL, initial);
             values.put(PendingRequestEntry.COLUMN_NAME_LOCATION, location);
             values.put(PendingRequestEntry.COLUMN_NAME_DURATION, duration);
-
-            // Insert the new row, returning the primary key value of the new row
             newRowId = db.insert(PendingRequestEntry.TABLE_NAME, null, values);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "<insert pending>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return newRowId;
     }
 
     public String getPending(String requestEntry){
-        SQLiteDatabase db = this.getReadableDatabase();
-        try {
-            Cursor c = db.query(
-                    PendingRequestEntry.TABLE_NAME,
-                    new String[]{requestEntry},
+        String pending = null;
+        try (SQLiteDatabase db = this.getReadableDatabase()) {
+            Cursor c = db.query(PendingRequestEntry.TABLE_NAME, new String[]{requestEntry},
                     null, null, null, null, null);
             c.moveToFirst();
-            if(!c.isAfterLast()) {
-                return c.getString(c.getColumnIndex(requestEntry));
-            }
-        }catch (Exception e){
+            pending = c.isAfterLast() ? null : c.getString(c.getColumnIndex(requestEntry));
+            c.close();
+        } catch (Exception e) {
             Log.d(TAG, "<getInitial>" + e.getMessage());
-        } finally {
-            db.close();
         }
-        return null;
+        return pending;
     }
 
     public long deletePending(){
-        SQLiteDatabase db = this.getWritableDatabase();
         long newRowId = -1;
-        try {
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
             newRowId = db.delete(PendingRequestEntry.TABLE_NAME, null, null);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "<delete pending>" + e.getMessage());
-        } finally {
-            db.close();
         }
         return newRowId;
     }
-
 
     public void setService(CallLogService service) {
         this.service = service;

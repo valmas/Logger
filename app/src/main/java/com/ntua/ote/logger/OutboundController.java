@@ -82,12 +82,6 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         sendSubsequentRequests();
     }
 
-    public synchronized void serviceStarted(){
-//        if(CommonUtils.haveNetworkConnectionPermitted(context)) {
-//            networkConnected();
-//        }
-    }
-
     public synchronized void sendSubsequentRequests(){
         if(!pendingLocationRequests.isEmpty()) {
             for (Map.Entry<Long, LocationRequest> entry : pendingLocationRequests.entrySet()) {

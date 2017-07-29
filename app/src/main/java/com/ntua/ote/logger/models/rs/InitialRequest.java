@@ -8,43 +8,24 @@ import java.util.Date;
 public class InitialRequest extends AuthenticationRequest {
 
 	private String brandModel;
-
 	private String version;
-
 	private String imei;
-
 	private String imsi;
-
 	private String phoneNumber;
-
 	private String externalPhoneNumber;
-
 	private Date dateTime;
-
 	private String smsContent;
-
 	private Direction direction;
-
 	private int cellId;
-
 	private int lac;
-
 	private int rssi;
-
 	private String lteRsrp;
-
 	private String lteRsrq;
-
 	private String lteRssnr;
-
 	private String lteCqi;
-
 	private LogType logType;
-
 	private String rat;
-
 	private int mnc;
-
 	private int mcc;
 
 	public InitialRequest(String brandModel, String version, String imei, String imsi,

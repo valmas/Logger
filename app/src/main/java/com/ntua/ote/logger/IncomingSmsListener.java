@@ -34,18 +34,18 @@ public class IncomingSmsListener extends BroadcastReceiver {
                     String target = null, message="";
                     final Object[] pdusObj = (Object[]) bundle.get("pdus");
 
-                    for (int i = 0; i < pdusObj.length; i++) {
-
-                        SmsMessage currentSMS;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            String format = bundle.getString("format");
-                            currentSMS = SmsMessage.createFromPdu((byte[]) pdusObj[i], format);
-                        } else {
-                            currentSMS = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+                    if (pdusObj != null) {
+                        for (Object aPdusObj : pdusObj) {
+                            SmsMessage currentSMS;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                String format = bundle.getString("format");
+                                currentSMS = SmsMessage.createFromPdu((byte[]) aPdusObj, format);
+                            } else {
+                                currentSMS = SmsMessage.createFromPdu((byte[]) aPdusObj);
+                            }
+                            target = currentSMS.getDisplayOriginatingAddress();
+                            message += currentSMS.getMessageBody();
                         }
-                        target = currentSMS.getDisplayOriginatingAddress();
-                        message += currentSMS.getMessageBody();
-
                     }
                     LogDetails logDetails = new LogDetails(target, new Date(), Direction.INCOMING, message);
                     if(!TextUtils.isEmpty(logDetails.getExternalNumber())) {
@@ -55,7 +55,6 @@ public class IncomingSmsListener extends BroadcastReceiver {
             }
         } catch (Exception e) {
             Log.e("SmsReceiver", "Exception smsReceiver" +e);
-
         }
     }
 }

@@ -20,11 +20,11 @@ public class Constants {
 
     public static final String FILE_NAME = "update.apk";
 
-    //public static final String SERVER_URL = "https://94.70.239.210:8443/logger/server/rest/log/";
+    public static final String SERVER_URL = "https://94.70.239.210:8443/logger/server/rest/log/";
 
     //public static final String SERVER_URL = "https://83.212.84.123:8443/logger/server/rest/log/";
 
-    public static final String SERVER_URL = "https://192.168.1.5:8443/logger/server/rest/log/";
+    //public static final String SERVER_URL = "https://192.168.1.5:8443/logger/server/rest/log/";
 
     public static final String SERVER_USERNAME = "admin";
 

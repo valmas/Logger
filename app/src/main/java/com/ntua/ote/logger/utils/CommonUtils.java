@@ -5,6 +5,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -60,8 +62,7 @@ public class CommonUtils {
 
     public static boolean havePermissions(PermissionsMapping pm, Activity act){
         for(String perm : pm.permission) {
-            if (ContextCompat.checkSelfPermission(act, perm)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(act, perm) != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
         }
@@ -94,15 +95,11 @@ public class CommonUtils {
     public static String getDetailedOsVersion(){
         StringBuilder builder = new StringBuilder();
         builder.append(Build.VERSION.RELEASE);
-
         int sdk = Build.VERSION.SDK_INT;
-
         AndroidVersions av = AndroidVersions.valueOf("S" + sdk);
         String versionName = av == null ? "" : av.versionName;
-
         builder.append(" ").append(versionName).append(" ");
         builder.append("(SDK ").append(sdk).append(")");
-
         return builder.toString();
     }
 
@@ -360,7 +357,6 @@ public class CommonUtils {
     public static int getMobileCountryCode(Context context){
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         String networkOperator = telephonyManager.getNetworkOperator();
-
         if (!TextUtils.isEmpty(networkOperator)) {
             return Integer.parseInt(networkOperator.substring(0, 3));
         }
@@ -370,7 +366,6 @@ public class CommonUtils {
     public static int getMobileNetworkCode(Context context){
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         String networkOperator = telephonyManager.getNetworkOperator();
-
         if (!TextUtils.isEmpty(networkOperator)) {
             return Integer.parseInt(networkOperator.substring(3));
         }
@@ -386,18 +381,15 @@ public class CommonUtils {
                 ca = cf.generateCertificate(caInput);
                 System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
             }
-
             // Create a KeyStore containing our trusted CAs
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
             keyStore.setCertificateEntry("ca", ca);
-
             // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
-
             // Create an SSLContext that uses our TrustManager
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, tmf.getTrustManagers(), null);
@@ -407,4 +399,11 @@ public class CommonUtils {
         return sslContext;
     }
 
+    public static Drawable getDrawable(int id, Resources resources){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return resources.getDrawable(id, null);
+        } else {
+            return resources.getDrawable(id);
+        }
+    }
 }

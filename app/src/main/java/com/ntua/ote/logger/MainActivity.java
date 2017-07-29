@@ -13,8 +13,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -25,8 +25,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
-import com.jaredrummler.android.device.DeviceName;
 import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.utils.CommonUtils;
@@ -42,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
 
     private BroadcastReceiver callLogReceiver;
-
-    private TelephonyManager tm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,21 +60,18 @@ public class MainActivity extends AppCompatActivity {
 
         initFromPreferences();
         initFromDb();
-        tm = (TelephonyManager) getSystemService( Context.TELEPHONY_SERVICE );
 
         if(CommonUtils.havePermissions(PermissionsMapping.INIT_PERMISSIONS, this)) {
             getPhoneDetails();
         } else {
             CommonUtils.requestPermission(PermissionsMapping.INIT_PERMISSIONS, this);
         }
-
         callLogServiceIntent = new Intent(this, CallLogService.class);
         if(CommonUtils.isServiceRunning(CallLogService.class, this)) {
             Log.d(TAG, "service is running");
             ToggleButton sw = (ToggleButton) findViewById(R.id.launch_btn);
             sw.setChecked(true);
         }
-
     }
 
     public void initFromPreferences(){
@@ -109,10 +102,10 @@ public class MainActivity extends AppCompatActivity {
 
         tv = (TextView) findViewById(R.id.msisdn);
         String msisdn = phoneDetails.getMsisdn();
-        if("".equals(msisdn)){
+        if(TextUtils.isEmpty(msisdn)){
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             msisdn = sharedPref.getString(SettingsActivity.KEY_PREF_MSISDN, "");
-            if("".equals(msisdn)) {
+            if(TextUtils.isEmpty(msisdn)) {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 openDialogForMSISDN(tv, editor);
             } else {
@@ -121,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tv.setText(msisdn);
         }
-
     }
 
     private void openDialogForMSISDN(final TextView tv, final SharedPreferences.Editor editor){
@@ -170,14 +162,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case 1: {
                 if (grantResults.length == 0 || CommonUtils.deniedPermissionExists(grantResults)) {
@@ -189,12 +179,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             case 2: {
-                if (grantResults.length == 0 || CommonUtils.deniedPermissionExists(grantResults)) {
-
-                } else {
+                if (grantResults.length != 0 && !CommonUtils.deniedPermissionExists(grantResults)) {
                     getPhoneDetails();
                 }
-                return;
             }
         }
     }
@@ -229,8 +216,6 @@ public class MainActivity extends AppCompatActivity {
     public void expand(final View v) {
         v.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
-
-        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
         v.getLayoutParams().height = 1;
         v.setVisibility(View.VISIBLE);
         Animation a = new Animation()
@@ -248,15 +233,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         };
-
-        // 1dp/ms
         a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);
     }
 
     public void collapse(final View v) {
         final int initialHeight = v.getMeasuredHeight();
-
         Animation a = new Animation()
         {
             @Override
@@ -274,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         };
-
         // 1dp/ms
         a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
         v.startAnimation(a);

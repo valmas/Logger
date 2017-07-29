@@ -22,10 +22,8 @@ import com.ntua.ote.logger.models.PhoneDetails;
 import com.ntua.ote.logger.models.StrengthDetails;
 import com.ntua.ote.logger.models.rs.InitialRequest;
 import com.ntua.ote.logger.utils.CommonUtils;
-import com.ntua.ote.logger.utils.GLocationFinder;
 import com.ntua.ote.logger.utils.LocationFinder;
 import com.ntua.ote.logger.utils.LogType;
-import com.ntua.ote.logger.utils.RequestType;
 
 import java.util.Date;
 
@@ -38,20 +36,15 @@ public class CallLogService extends Service{
     private IncomingSmsListener incomingSmsListener;
     private PhoneCallListener phoneCallListener;
     private TelephonyManager tm;
-    private GLocationFinder gLocationFinder;
     private PhoneStateListener signalStrengthListener;
     private StrengthDetails strengthDetails;
     private NetworkConnectivityReceiver networkConnectivityReceiver;
 
     static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
-
     static final public String COPA_MESSAGE = "com.ntua.ote.logger.CallLogService.COPA_MSG";
-
-    private static final String TAG = CallLogService.class.getName();
 
     @Override
     public void onDestroy() {
-        gLocationFinder.stop();
         unregisterReceiver(outgoingCallsReceiver);
         unregisterReceiver(incomingSmsListener);
         getContentResolver().unregisterContentObserver(callObserver);
@@ -59,9 +52,7 @@ public class CallLogService extends Service{
         unregisterReceiver(networkConnectivityReceiver);
         tm.listen(phoneCallListener, PhoneStateListener.LISTEN_NONE );
         tm.listen(signalStrengthListener, PhoneStateListener.LISTEN_NONE);
-
         OutboundController.getInstance(this).destroy();
-
         super.onDestroy();
     }
 
@@ -73,8 +64,6 @@ public class CallLogService extends Service{
 
     @Override
     public void onCreate() {
-        gLocationFinder = new GLocationFinder(this);
-        gLocationFinder.start();
         Date latestCall = getLogsLatestCall();
         tm = (TelephonyManager) getSystemService( Context.TELEPHONY_SERVICE );
         broadcaster = LocalBroadcastManager.getInstance(this);
@@ -120,9 +109,6 @@ public class CallLogService extends Service{
         registerReceiver(networkConnectivityReceiver,filter);
 
         ApplicationController.getInstance().updatePhoneDetails(this);
-
-        OutboundController.getInstance(this).serviceStarted();
-
     }
 
     public void storeAndSend(LogDetails logDetails){
@@ -151,22 +137,23 @@ public class CallLogService extends Service{
                 ApplicationController.getInstance().addUnfinishedCall(logDetails.getExternalNumber(), rowId);
             }
             LocationFinder.getInstance(this).getLocation(rowId);
-            //gLocationFinder.getLocation(rowId);
         }
     }
 
     public Date getLogsLatestCall(){
         Uri callLogUri = CallLog.Calls.CONTENT_URI;
         Date callDayTime = null;
-        try{
+        try {
             Cursor managedCursor = this.getApplicationContext().getContentResolver().query(callLogUri, null, null, null, null);
-            int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
-            managedCursor.moveToLast();
-            if (!managedCursor.isAfterLast()) {
-                String callDate = managedCursor.getString(date);
-                callDayTime = new Date(Long.valueOf(callDate));
+            if (managedCursor != null) {
+                int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
+                managedCursor.moveToLast();
+                if (!managedCursor.isAfterLast()) {
+                    String callDate = managedCursor.getString(date);
+                    callDayTime = new Date(Long.valueOf(callDate));
+                }
+                managedCursor.close();
             }
-            managedCursor.close();
         } catch (SecurityException e) {
             Log.e("CallLogService", "<init> READ CALL LOG permission not found");
         }

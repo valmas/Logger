@@ -4,12 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
-import com.ntua.ote.logger.db.CallLogDbHelper;
 import com.ntua.ote.logger.models.LogDetails;
 import com.ntua.ote.logger.utils.Direction;
-import com.ntua.ote.logger.utils.LocationFinder;
-
 import java.util.Date;
 
 public class OutgoingCallsReceiver extends BroadcastReceiver {

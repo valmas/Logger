@@ -31,7 +31,6 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, new SettingsFragment())
@@ -46,7 +45,6 @@ public class SettingsActivity extends AppCompatActivity {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(act, pm.permission[0])
                 != PackageManager.PERMISSION_GRANTED) {
-
             if (ActivityCompat.shouldShowRequestPermissionRationale(act, pm.permission[0])) {
                 ActivityCompat.requestPermissions(act, pm.permission, pm.requestCode);
             } else {
@@ -60,9 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case 3: {
-                if (grantResults.length == 0 || CommonUtils.deniedPermissionExists(grantResults)) {
-
-                } else {
+                if (grantResults.length != 0 && !CommonUtils.deniedPermissionExists(grantResults)) {
                     UpdateController.getInstance(this).download();
                 }
             }

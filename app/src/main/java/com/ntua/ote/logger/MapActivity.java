@@ -1,10 +1,8 @@
 package com.ntua.ote.logger;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -15,7 +13,6 @@ import com.ntua.ote.logger.utils.Constants;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
     private double latitude;
     private double longitude;
     private String title;
@@ -39,17 +36,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         title = b == null ? "" : b.getString(Constants.EXTERNAL_NUMBER_KEY);
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
         if(latitude != -1 && longitude != -1) {
-            LatLng sydney = new LatLng(latitude, longitude);
-            mMap.addMarker(new MarkerOptions().position(sydney).title(title));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            LatLng location = new LatLng(latitude, longitude);
+            googleMap.addMarker(new MarkerOptions().position(location).title(title));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+            googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         }
     }
 }

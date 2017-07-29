@@ -3,13 +3,9 @@ package com.ntua.ote.logger.models;
 public class PhoneDetails {
 
     private String brandModel;
-
     private String version;
-
     private String imei;
-
     private String imsi;
-
     private String msisdn;
 
     public PhoneDetails(String brandModel, String version, String imei, String imsi, String msisdn) {

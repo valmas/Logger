@@ -3,7 +3,6 @@ package com.ntua.ote.logger.models.rs;
 public class Version {
 
     private String versionNumber;
-
     private String changeLog;
 
     public String getVersionNumber() {

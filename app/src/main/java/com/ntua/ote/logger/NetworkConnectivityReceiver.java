@@ -8,8 +8,6 @@ import com.ntua.ote.logger.utils.CommonUtils;
 
 public class NetworkConnectivityReceiver extends BroadcastReceiver {
 
-    private static final String TAG = NetworkConnectivityReceiver.class.getName();
-
     @Override
     public void onReceive(Context context, Intent intent) {
         if(CommonUtils.haveNetworkConnectionPermitted(context)){
