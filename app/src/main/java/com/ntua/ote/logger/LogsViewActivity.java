@@ -29,7 +29,7 @@ import com.ntua.ote.logger.utils.LogType;
 import java.util.Date;
 
 
-public class CallsViewActivity extends AppCompatActivity {
+public class LogsViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public class CallsViewActivity extends AppCompatActivity {
         initFromPreferences();
 
         getFragmentManager().beginTransaction()
-                .add(R.id.list_view_layout, new CallListFragment()).commit();
+                .add(R.id.list_view_layout, new LogListFragment()).commit();
     }
 
     public void initFromPreferences(){
@@ -62,12 +62,15 @@ public class CallsViewActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    public static class CallListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    /** Inner Class that handles the list of calls/SMS */
+    public static class LogListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
         public SimpleCursorAdapter mAdapter;
 
         private ProgressBar progressBar;
 
+        /** Creates a progress bar that handles the loading animation while the calls/SMSs
+         * are loading from the database and displays the calls/Sms in a list */
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             progressBar = new ProgressBar(getActivity());
@@ -140,11 +143,10 @@ public class CallsViewActivity extends AppCompatActivity {
             });
             setListAdapter(mAdapter);
             getListView().setEmptyView(getActivity().findViewById(android.R.id.empty));
-            // Prepare the loader.  Either re-connect with an existing one,
-            // or start a new one.
             getLoaderManager().initLoader(0, b, this);
         }
 
+        /** Create a loader that queries the database in the background */
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             LogType type = args == null ? null : LogType.parseCode(args.getInt(Constants.LOG_TYPE_KEY));
@@ -170,6 +172,7 @@ public class CallsViewActivity extends AppCompatActivity {
 
         }
 
+        /** Redirects the user to ViewEntry screen upon selecting an entry */
         @Override
         public void onListItemClick(ListView l, View v, int position, long id) {
             super.onListItemClick(l, v, position, id);

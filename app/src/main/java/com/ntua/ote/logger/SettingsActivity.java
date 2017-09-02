@@ -26,6 +26,8 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String KEY_PREF_MSISDN = "pref_msisdn";
     public static final String KEY_PREF_UPDATE = "pref_update";
 
+    /** Method that called on the creation of the activity.
+     * Initialize the activity */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,12 +67,15 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    /** Inner class that handles the updating of the preferences */
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         private CheckBoxPreference wifiData;
         private CheckBoxPreference data;
         private CheckBoxPreference wifi;
 
+        /** Method that called upon the creation of the fragment.
+         * Initialize the settings screen and creates listener that handles the updating of preferences  */
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -133,6 +138,10 @@ public class SettingsActivity extends AppCompatActivity {
             });
         }
 
+        /** Method that is invoked upon the updating of a preference *
+         *  If user enables run_on_start option requests the REBOOT_NOTIF permission
+         *  If user enables keep screen on updates the applications activities
+         */
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(KEY_PREF_RUN_ON_START)) {

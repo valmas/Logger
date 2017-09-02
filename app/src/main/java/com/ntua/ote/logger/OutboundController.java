@@ -42,6 +42,9 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         return ourInstance;
     }
 
+    /** Initializes OutboundController by invoking the database to retrieve any pending logs that have
+     *  not been sent to the server
+     */
     private OutboundController(Context context){
         this.context = context;
         Gson gson = new Gson();
@@ -72,6 +75,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         CallLogDbHelper.getInstance(context).deletePending();
     }
 
+    /** When internet is available tries to send the pending requests */
     public synchronized void networkConnected(){
         Log.i(TAG, "network Connected");
         if(!pendingInitialRequests.isEmpty()) {
@@ -82,6 +86,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         sendSubsequentRequests();
     }
 
+    /** Sends those LOCATION and DURATION requests that their corresponding INITIAL request
+     *  has been sent successfully */
     public synchronized void sendSubsequentRequests(){
         if(!pendingLocationRequests.isEmpty()) {
             for (Map.Entry<Long, LocationRequest> entry : pendingLocationRequests.entrySet()) {
@@ -111,6 +117,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
     }
 
+    /** When a new entry has been logged try to sent it to the server */
     public synchronized void newEntryAdded(long localId, InitialRequest initialRequest){
         Log.i(TAG, "new entry");
         setAuthentication(initialRequest);
@@ -120,6 +127,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
     }
 
+    /** When a new location entry has been logged try to sent it to the server when its
+     * corresponding INITIAL request has been sent successfully */
     public synchronized void locationAdded(long localId, LocationRequest locationRequest){
         setAuthentication(locationRequest);
         if(!pendingLocationRequests.containsKey(localId)) {
@@ -134,6 +143,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
     }
 
+    /** When a new duration entry has been logged try to sent it to the server when its
+     * corresponding INITIAL request has been sent successfully */
     public synchronized void durationAdded(long localId, DurationRequest durationRequest){
         setAuthentication(durationRequest);
         pendingDurationRequests.put(localId, durationRequest);
@@ -146,6 +157,10 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
     }
 
+    /** On successful submission of a request to the server this method is invoked. If the request
+     *  ia an INITIAL request the pending request is deleted and its corresponding duration and
+     *  location requests are trying to be sent. If the request is a DURATION or a LOCATION the
+     *  pending request is deleted */
     @Override
     public synchronized void processFinish(AsyncResponseLogDetails output) {
         if(output != null && output.isSuccess()) {
@@ -175,6 +190,8 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
     }
 
+    /** On termination of the service all the pending requests are stored to the Database in order
+     * to be sent the next time that the service starts */
     public void destroy(){
         String initial = null;
         String location = null;

@@ -41,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
 
     private BroadcastReceiver callLogReceiver;
 
+    /** Method that called on the creation of the activity.
+     * Creates a broadcast receiver to update the statistics every time a new call/SMS is logged
+     * If user grants the INIT_PERMISSIONS displays the phone details
+     * Checks if the Log Service is running in order to update the launch button
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         callLogReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                int code = intent.getIntExtra(CallLogService.COPA_MESSAGE, 0);
+                int code = intent.getIntExtra(LogService.COPA_MESSAGE, 0);
                 if(code == 1) {
                     initFromDb();
                 }
@@ -66,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             CommonUtils.requestPermission(PermissionsMapping.INIT_PERMISSIONS, this);
         }
-        callLogServiceIntent = new Intent(this, CallLogService.class);
-        if(CommonUtils.isServiceRunning(CallLogService.class, this)) {
+        callLogServiceIntent = new Intent(this, LogService.class);
+        if(CommonUtils.isServiceRunning(LogService.class, this)) {
             Log.d(TAG, "service is running");
             ToggleButton sw = (ToggleButton) findViewById(R.id.launch_btn);
             sw.setChecked(true);
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         this.findViewById(R.id.main_layout).setKeepScreenOn(value);
     }
 
+    /** Updates the statistics based on the number of calls/SMSs logged */
     public void initFromDb(){
         long callNum = CallLogDbHelper.getInstance(this).getCallCount();
         ((TextView) this.findViewById(R.id.calls_num)).setText(String.valueOf(callNum));
@@ -87,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) this.findViewById(R.id.sms_num)).setText(String.valueOf(smsNum));
     }
 
+    /** Retrieves and displays the phone details */
     public void getPhoneDetails(){
         ApplicationController.getInstance().updatePhoneDetails(this);
         PhoneDetails phoneDetails = ApplicationController.getInstance().getPhoneDetails();
@@ -116,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** If the MSISDN cannot be retrieved from the SIM opens a dialog in order for the user
+     *  to insert it.*/
     private void openDialogForMSISDN(final TextView tv, final SharedPreferences.Editor editor){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.msisdn_dialog_title));
@@ -148,14 +158,14 @@ public class MainActivity extends AppCompatActivity {
         initFromPreferences();
         initFromDb();
         LocalBroadcastManager.getInstance(this).registerReceiver((callLogReceiver),
-                new IntentFilter(CallLogService.COPA_RESULT)
+                new IntentFilter(LogService.COPA_RESULT)
         );
     }
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).registerReceiver((callLogReceiver),
-                new IntentFilter(CallLogService.COPA_RESULT)
+                new IntentFilter(LogService.COPA_RESULT)
         );
         super.onPause();
     }
@@ -186,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** Activates and deactivates the log Service.
+     *  Upon first activation user needs to grant the LOGGER_PERMISSIONS */
     public void onLogStart(View view) {
         boolean checked = ((ToggleButton) view).isChecked();
         if(checked) {
@@ -199,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** Redirect to Settings screen */
     public void settings(MenuItem item) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
@@ -261,16 +274,18 @@ public class MainActivity extends AppCompatActivity {
         v.startAnimation(a);
     }
 
+    /** Redirect to View Call List screen */
     public void viewCallsList(View view) {
-        Intent intent = new Intent(this, CallsViewActivity.class);
+        Intent intent = new Intent(this, LogsViewActivity.class);
         Bundle b = new Bundle();
         b.putInt(Constants.LOG_TYPE_KEY, LogType.CALL.code);
         intent.putExtras(b); //Put your id to your next Intent
         startActivity(intent);
     }
 
+    /** Redirect to View SMS List screen */
     public void viewSmsList(View view) {
-        Intent intent = new Intent(this, CallsViewActivity.class);
+        Intent intent = new Intent(this, LogsViewActivity.class);
         Bundle b = new Bundle();
         b.putInt(Constants.LOG_TYPE_KEY, LogType.SMS.code);
         intent.putExtras(b); //Put your id to your next Intent

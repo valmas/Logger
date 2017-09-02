@@ -11,9 +11,9 @@ import java.util.Date;
 public class OutgoingCallsReceiver extends BroadcastReceiver {
 
     public static final String TAG = OutgoingCallsReceiver.class.getSimpleName();
-    private CallLogService service;
+    private LogService service;
 
-    public OutgoingCallsReceiver(CallLogService service) {
+    public OutgoingCallsReceiver(LogService service) {
         this.service = service;
     }
 

@@ -38,6 +38,7 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         this.context = context;
     }
 
+    /** Gets the latest available version from the server */
     public void checkVersion(){
         if(CommonUtils.haveNetworkConnection(context)) {
             new UpdateClient(this).execute(RequestType.CHECK_VERSION, context);
@@ -46,6 +47,8 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         }
     }
 
+    /** Informs the user of the newest version and its the changeLog.
+     * Asks the user to download the newest version */
     private void newVersionAlert(Context context, final String filename, final String changeLog){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage("   A Newer Version is Available (" + filename + ").\n\n   " +
@@ -68,6 +71,7 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         alert.show();
     }
 
+    /** Requests DOWNLOAD_PERMISSIONS from user in order to download the newest version */
     private void alertOnClick(){
         if(CommonUtils.havePermissions(PermissionsMapping.DOWNLOAD_PERMISSIONS, context)) {
             download();
@@ -76,6 +80,7 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         }
     }
 
+    /** Downloads the newest version */
     public void download() {
 
         if(CommonUtils.haveNetworkConnection(context)) {
@@ -85,6 +90,8 @@ public class UpdateController implements AsyncResponse<AsyncResponseUpdateDetail
         }
     }
 
+    /** A callback method that is invoked from the UpdateClient when the latest version is retrieved
+     * or the download has been completed */
     @Override
     public void processFinish(AsyncResponseUpdateDetails output) {
         if(output != null) {

@@ -11,9 +11,9 @@ import java.util.Date;
 public class PhoneCallListener extends PhoneStateListener {
 
     public static final String TAG = PhoneCallListener.class.getSimpleName();
-    private CallLogService service;
+    private LogService service;
 
-    public PhoneCallListener(CallLogService service) {
+    public PhoneCallListener(LogService service) {
         this.service = service;
     }
 

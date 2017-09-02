@@ -17,9 +17,9 @@ import java.util.Date;
 public class IncomingSmsListener extends BroadcastReceiver {
 
     public static final String TAG = IncomingSmsListener.class.getSimpleName();
-    private CallLogService service;
+    private LogService service;
 
-    public IncomingSmsListener(CallLogService service) {
+    public IncomingSmsListener(LogService service) {
         this.service = service;
     }
 

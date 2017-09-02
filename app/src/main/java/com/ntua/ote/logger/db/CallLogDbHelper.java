@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.ntua.ote.logger.CallLogService;
+import com.ntua.ote.logger.LogService;
 import com.ntua.ote.logger.db.CallLogDbSchema.CallLogEntry;
 import com.ntua.ote.logger.db.CallLogDbSchema.PendingRequestEntry;
 import com.ntua.ote.logger.models.LogDetails;
@@ -25,7 +25,7 @@ import java.util.Locale;
 public class CallLogDbHelper extends SQLiteOpenHelper {
 
     private static CallLogDbHelper sInstance;
-    private CallLogService service;
+    private LogService service;
 
     public static final int DATABASE_VERSION = 14;
     public static final String DATABASE_NAME = "logger.db";
@@ -266,7 +266,7 @@ public class CallLogDbHelper extends SQLiteOpenHelper {
         return newRowId;
     }
 
-    public void setService(CallLogService service) {
+    public void setService(LogService service) {
         this.service = service;
     }
 }

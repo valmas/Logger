@@ -27,7 +27,7 @@ import com.ntua.ote.logger.utils.LogType;
 
 import java.util.Date;
 
-public class CallLogService extends Service{
+public class LogService extends Service{
 
     private AbstractObserver callObserver;
     private AbstractObserver smsObserver;
@@ -40,9 +40,10 @@ public class CallLogService extends Service{
     private StrengthDetails strengthDetails;
     private NetworkConnectivityReceiver networkConnectivityReceiver;
 
-    static final public String COPA_RESULT = "com.ntua.ote.logger.CallLogService.REQUEST_PROCESSED";
-    static final public String COPA_MESSAGE = "com.ntua.ote.logger.CallLogService.COPA_MSG";
+    static final public String COPA_RESULT = "com.ntua.ote.logger.LogService.REQUEST_PROCESSED";
+    static final public String COPA_MESSAGE = "com.ntua.ote.logger.LogService.COPA_MSG";
 
+    /** Unregisters the Observers, Listeners and Receivers from the service */
     @Override
     public void onDestroy() {
         unregisterReceiver(outgoingCallsReceiver);
@@ -62,6 +63,7 @@ public class CallLogService extends Service{
         return null;
     }
 
+    /** Initializes and register the Receivers, Listeners and Observers required for the logging */
     @Override
     public void onCreate() {
         Date latestCall = getLogsLatestCall();
@@ -111,6 +113,7 @@ public class CallLogService extends Service{
         ApplicationController.getInstance().updatePhoneDetails(this);
     }
 
+    /** Stores the logged entry and sent it to the server */
     public void storeAndSend(LogDetails logDetails){
         logDetails.setCellId(CommonUtils.getCelliId(this));
         logDetails.setLac(CommonUtils.getLat(this));
@@ -155,11 +158,12 @@ public class CallLogService extends Service{
                 managedCursor.close();
             }
         } catch (SecurityException e) {
-            Log.e("CallLogService", "<init> READ CALL LOG permission not found");
+            Log.e("LogService", "<init> READ CALL LOG permission not found");
         }
         return callDayTime;
     }
 
+    /** Informs Main Activity that the database has been updated */
     public void dbUpdated(int code) {
         Intent intent = new Intent(COPA_RESULT);
         intent.putExtra(COPA_MESSAGE, code);

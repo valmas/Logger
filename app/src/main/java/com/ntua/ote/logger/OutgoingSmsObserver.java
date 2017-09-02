@@ -10,12 +10,12 @@ import java.util.Date;
 
 public class OutgoingSmsObserver extends AbstractObserver {
 
-    private CallLogService service;
+    private LogService service;
     private int latestSmsId;
 
-    private static final String TAG = CallLogService.class.getName();
+    private static final String TAG = LogService.class.getName();
 
-    public OutgoingSmsObserver(Handler handler, CallLogService service) {
+    public OutgoingSmsObserver(Handler handler, LogService service) {
         super(handler);
         this.service = service;
         latestSmsId = getLastMsgId();

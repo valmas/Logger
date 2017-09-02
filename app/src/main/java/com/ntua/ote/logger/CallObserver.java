@@ -16,10 +16,10 @@ public class CallObserver extends AbstractObserver {
 
     private static final String TAG = CallObserver.class.getName();
 
-    private CallLogService service;
+    private LogService service;
     private Date latestCall;
 
-    public CallObserver(Handler handler, CallLogService service, Date latestCall) {
+    public CallObserver(Handler handler, LogService service, Date latestCall) {
         super(handler);
         this.service = service;
         this.latestCall = latestCall;

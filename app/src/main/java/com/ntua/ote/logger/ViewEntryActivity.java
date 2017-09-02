@@ -22,6 +22,7 @@ public class ViewEntryActivity extends AppCompatActivity {
     private LogDetails logDetails;
     private Dialog smsContentDialog;
 
+    /** On activity creation parameterize and displays the layout the details of the Call/SMS */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +104,7 @@ public class ViewEntryActivity extends AppCompatActivity {
         }
     }
 
+    /** Redirects the user to the map screen upon selecting to display the location of the log */
     public void showLocation(View view) {
         Intent intent = new Intent(this, MapActivity.class);
         Bundle b = new Bundle();
@@ -113,6 +115,8 @@ public class ViewEntryActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /** Displays a dialog to the user with the SMS content if the SMS content is too large to
+     * be displayed int the layout */
     public void showSmsContent(View view) {
         if(logDetails.getSmsContent().length() > 28) {
             smsContentDialog = new Dialog(this);

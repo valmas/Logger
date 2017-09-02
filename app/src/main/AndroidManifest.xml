@@ -41,7 +41,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".CallsViewActivity"
+            android:name=".LogsViewActivity"
             android:label="@string/calls_view_label"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
@@ -53,16 +53,16 @@
         <activity
             android:name=".ViewEntryActivity"
             android:label="@string/view_entry"
-            android:parentActivityName=".CallsViewActivity"
+            android:parentActivityName=".LogsViewActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CallsViewActivity" />
+                android:value=".LogsViewActivity" />
         </activity>
 
         <service
-            android:name=".CallLogService"
+            android:name=".LogService"
             android:exported="false" />
 
         <receiver android:name=".BootEventReceiver">
