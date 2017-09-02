@@ -27,9 +27,9 @@ public class OutgoingSmsObserver extends AbstractObserver {
 
     protected void getInfoAndSend(){
         try{
-            Cursor managedCursor = service.getContentResolver().query(Telephony.Sms.Sent.CONTENT_URI, null, null, null, null);
+            Cursor managedCursor = service.getContentResolver().query(Telephony.Sms.Sent.CONTENT_URI, null, null, null, "date ASC");
             if (managedCursor != null) {
-                managedCursor.moveToFirst();
+                managedCursor.moveToLast();
                 if (!managedCursor.isAfterLast()) {
                     int type = managedCursor.getInt(managedCursor.getColumnIndex(Telephony.Sms.Sent.TYPE));
                     Log.i(TAG, "SMS type: " + type);
