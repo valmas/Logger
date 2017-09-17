@@ -65,8 +65,9 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
             pendingLocationRequests = new HashMap<>();
         }
         String duration = CallLogDbHelper.getInstance(context)
-                .getPending(CallLogDbSchema.PendingRequestEntry.COLUMN_NAME_INITIAL);
+                .getPending(CallLogDbSchema.PendingRequestEntry.COLUMN_NAME_DURATION);
         if(duration != null) {
+            Log.i(TAG, duration);
             Type typeOfHashMap = new TypeToken<Map<Long, DurationRequest>>() { }.getType();
             pendingDurationRequests = gson.fromJson(duration, typeOfHashMap);
         } else {
@@ -205,6 +206,7 @@ public class OutboundController implements AsyncResponse<AsyncResponseLogDetails
         }
         if(!pendingDurationRequests.isEmpty()) {
             duration = gson.toJson(pendingDurationRequests);
+            Log.i(TAG, duration);
         }
         CallLogDbHelper.getInstance(context).insertPending(initial, location, duration);
         ourInstance=null;
